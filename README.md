@@ -34,7 +34,7 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
    ```bash
    cp .env.example .env.local
    ```
-   Edit `.env.local` and set `SUPABASE_URL` and `SUPABASE_ANON_KEY` from your [Supabase project settings](https://supabase.com/dashboard/project/_/settings/api).
+   Edit `.env.local` and set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from your [Supabase project settings](https://supabase.com/dashboard/project/_/settings/api).
 
 3. **Start the app**:
    ```bash
