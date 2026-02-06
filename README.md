@@ -20,6 +20,39 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Supabase integration
+
+### Run and test
+
+1. **Install dependencies** (if you haven’t):
+   ```bash
+   npm install
+   ```
+
+2. **Configure Supabase**  
+   Copy `.env.example` to `.env.local` and set your project values:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Edit `.env.local` and set `SUPABASE_URL` and `SUPABASE_ANON_KEY` from your [Supabase project settings](https://supabase.com/dashboard/project/_/settings/api).
+
+3. **Start the app**:
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000). The home page shows a “Supabase example” section: if env is missing or the `items` table doesn’t exist, you’ll see a short message; once the table exists and env is set, it will show how many rows were fetched.
+
+4. **Optional – create the example table**  
+   In the Supabase SQL editor, run:
+   ```sql
+   create table public.items (
+     id uuid primary key default gen_random_uuid(),
+     name text
+   );
+   insert into public.items (name) values ('First item'), ('Second item');
+   ```
+   Reload the app to see “Fetched 2 row(s) from table items.”
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
