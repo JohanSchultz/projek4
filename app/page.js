@@ -1,6 +1,14 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
+
+async function signOut() {
+  "use server";
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
+}
 
 async function addEquipmentCategory(formData) {
   "use server";
@@ -9,7 +17,7 @@ async function addEquipmentCategory(formData) {
   const descrStr =
     typeof descr === "string" ? descr.trim() : "";
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
     const { error } = await supabase.from("equipmentcategories").insert({
       descr: descrStr || null,
       isactive,
@@ -23,7 +31,7 @@ async function addEquipmentCategory(formData) {
 
 async function getEquipmentCategories() {
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
     const { data, error } = await supabase
       .from("equipmentcategories")
       .select("*")
@@ -84,9 +92,19 @@ export default async function Home({ searchParams: searchParamsProp }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-zinc-950">
       <main className="flex flex-col items-center justify-center gap-4 px-8 text-center">
-        <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
-          Dagsê Maatjies
-        </h1>
+        <div className="flex w-full max-w-2xl items-center justify-between gap-4">
+          <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
+            Dagsê Maatjies
+          </h1>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
         <p className="text-lg text-zinc-600 dark:text-zinc-400">
           Welcome to your Next.js app.
         </p>
