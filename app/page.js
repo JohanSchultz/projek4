@@ -4,7 +4,7 @@ async function getEquipmentCategories() {
   try {
     const supabase = createSupabaseClient();
     const { data, error } = await supabase
-      .from("EquipmentCategories")
+      .from("equipmentcategories")
       .select("*")
       .order("id", { ascending: true });
     if (error) throw error;
@@ -15,25 +15,17 @@ async function getEquipmentCategories() {
 }
 
 function getCategoryLabel(row) {
-  const label =
-    row.name ??
-    row.Name ??
-    row.category_name ??
-    row.categoryName ??
-    row.title ??
-    row.Title ??
-    row.description ??
-    row.Description;
+  // Table columns: id, created_at, descr, isactive
+  const label = row.descr;
   if (label != null) return String(label);
-  const first = Object.values(row).find((v) => typeof v === "string");
-  return first != null ? String(first) : String(row.id ?? row.Id ?? "—");
+  return String(row.id ?? "—");
 }
 
 export default async function Home() {
   const { data: categories, error } = await getEquipmentCategories();
   const supabaseAnonKey =
     typeof process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY === "string"
-      ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.slice(0, 14)
+      ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.slice(0, 5)
       : "";
 
   return (
