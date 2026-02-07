@@ -16,7 +16,7 @@ export default function LoginPage() {
       .auth.getSession()
       .then(({ data: { session } }) => {
         if (session) {
-          router.replace("/");
+          router.replace("/menu");
         }
       });
   }, [router]);
@@ -32,7 +32,7 @@ export default function LoginPage() {
         password,
       });
       if (signInError) throw signInError;
-      router.push("/");
+      router.push("/menu");
       router.refresh();
     } catch (err) {
       setError(err.message ?? "Login failed");
