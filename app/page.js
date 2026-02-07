@@ -31,16 +31,33 @@ function getCategoryLabel(row) {
 
 export default async function Home() {
   const { data: categories, error } = await getEquipmentCategories();
+  const supabaseAnonKey =
+    typeof process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY === "string"
+      ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.slice(0, 14)
+      : "";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-zinc-950">
       <main className="flex flex-col items-center justify-center gap-4 px-8 text-center">
         <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
-          Hello World
+          Dagsê Maatjies
         </h1>
         <p className="text-lg text-zinc-600 dark:text-zinc-400">
           Welcome to your Next.js app.
         </p>
+
+        <label className="mt-4 flex flex-col items-center gap-1 text-left">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400">
+            Anon key (first 10 chars)
+          </span>
+          <input
+            type="text"
+            readOnly
+            defaultValue={supabaseAnonKey}
+            className="w-full max-w-xs rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200"
+            aria-label="First 10 characters of Supabase anon key"
+          />
+        </label>
 
         <section
           className="mt-8 w-full max-w-md rounded-lg border border-zinc-200 bg-white px-6 py-4 text-left dark:border-zinc-800 dark:bg-zinc-900"
