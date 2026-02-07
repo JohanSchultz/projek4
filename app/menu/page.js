@@ -78,17 +78,10 @@ export default function MenuPage() {
                 </li>
               </ul>
             </li>
-            <li role="treeitem" aria-expanded="true">
+            <li role="treeitem">
               <span className="block rounded px-2 py-1.5 text-2xl font-bold text-zinc-800 bg-[#F0FFFF] dark:bg-[#F0FFFF] dark:text-zinc-800">
                 Reports
               </span>
-              <ul className="mt-0.5 pl-4 space-y-0.5" role="group">
-                <li role="treeitem">
-                  <span className="block rounded px-2 py-1.5 text-sm font-medium text-zinc-800 bg-[#FFE4B5] hover:bg-[#FFDAB9] dark:bg-[#FFE4B5] dark:text-zinc-800 dark:hover:bg-[#FFDAB9]">
-                    Report Screen
-                  </span>
-                </li>
-              </ul>
             </li>
           </ul>
         </nav>
