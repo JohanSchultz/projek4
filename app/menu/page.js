@@ -72,9 +72,12 @@ export default function MenuPage() {
               </span>
               <ul className="mt-0.5 pl-4 space-y-0.5" role="group">
                 <li role="treeitem">
-                  <span className="block rounded px-2 py-1.5 text-sm font-medium text-zinc-800 bg-[#FFE4B5] hover:bg-[#FFDAB9] dark:bg-[#FFE4B5] dark:text-zinc-800 dark:hover:bg-[#FFDAB9]">
+                  <Link
+                    href="/add-job"
+                    className="block rounded px-2 py-1.5 text-sm font-medium text-zinc-800 bg-[#FFE4B5] hover:bg-[#FFDAB9] dark:bg-[#FFE4B5] dark:text-zinc-800 dark:hover:bg-[#FFDAB9]"
+                  >
                     Add Job
-                  </span>
+                  </Link>
                 </li>
               </ul>
             </li>
