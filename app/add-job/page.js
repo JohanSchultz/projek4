@@ -16,6 +16,22 @@ async function getEquipmentTypes() {
     const { data, error } = await supabase
       .from("equipmenttypes")
       .select("id, descr")
+      .eq("isactive", true)
+      .order("descr", { ascending: true });
+    if (error) throw error;
+    return { data: data ?? [], error: null };
+  } catch (err) {
+    return { data: null, error: err?.message ?? String(err) };
+  }
+}
+
+async function getTechnicians() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("technicians")
+      .select("id, descr")
+      .eq("isactive", true)
       .order("descr", { ascending: true });
     if (error) throw error;
     return { data: data ?? [], error: null };
@@ -40,10 +56,29 @@ async function fetchPartsByTypeId(typeId) {
   }
 }
 
+async function fetchItemsPerType(typeId) {
+  "use server";
+  try {
+    const id = Number(typeId);
+    if (Number.isNaN(id)) return { data: [], error: null };
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("get_itemspertype", {
+      p_type_id: id,
+    });
+    if (error) throw error;
+    return { data: Array.isArray(data) ? data : [], error: null };
+  } catch (err) {
+    return { data: null, error: err?.message ?? String(err) };
+  }
+}
+
 export default async function AddJobPage() {
   const { data: equipmentTypes, error: typesError } =
     await getEquipmentTypes();
+  const { data: technicians, error: techniciansError } =
+    await getTechnicians();
   const types = equipmentTypes ?? [];
+  const techList = technicians ?? [];
   const firstId = types.length > 0 ? types[0].id : null;
   const initialParts =
     firstId != null
@@ -80,10 +115,17 @@ export default async function AddJobPage() {
             {typesError}
           </p>
         )}
+        {techniciansError && (
+          <p className="mb-4 text-sm text-amber-600 dark:text-amber-400">
+            {techniciansError}
+          </p>
+        )}
         <AddJobContent
           equipmentTypes={types}
+          technicians={techList}
           initialPartsData={initialParts}
           fetchPartsByTypeId={fetchPartsByTypeId}
+          fetchItemsPerType={fetchItemsPerType}
         />
       </main>
     </div>
