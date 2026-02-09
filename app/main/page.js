@@ -83,11 +83,6 @@ export default async function MainPage({ searchParams: searchParamsProp }) {
       ? sortCategories(categories, sort, dir)
       : categories;
 
-  const supabaseAnonKey =
-    typeof process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY === "string"
-      ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.slice(0, 5)
-      : "";
-
   const basePath = "/main";
   const sortHref = (key) =>
     `${basePath}?sort=${key}&dir=${sort === key && dir === "asc" ? "desc" : "asc"}`;
@@ -117,19 +112,6 @@ export default async function MainPage({ searchParams: searchParamsProp }) {
         <p className="text-lg text-zinc-600 dark:text-zinc-400">
           Welcome to your Next.js app.
         </p>
-
-        <label className="mt-4 flex flex-col items-center gap-1 text-left">
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">
-            Anon key (first 10 chars)
-          </span>
-          <input
-            type="text"
-            readOnly
-            defaultValue={supabaseAnonKey}
-            className="w-full max-w-xs rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200"
-            aria-label="First 10 characters of Supabase anon key"
-          />
-        </label>
 
         <section
           className="mt-8 w-full max-w-2xl rounded-lg border border-zinc-200 bg-white px-6 py-4 text-left dark:border-zinc-800 dark:bg-zinc-900"
