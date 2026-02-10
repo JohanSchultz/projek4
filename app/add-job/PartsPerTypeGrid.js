@@ -54,20 +54,31 @@ function columnHeading(key) {
   return COLUMN_HEADINGS[key] ?? key;
 }
 
-export function PartsPerTypeGrid({ data }) {
+export function PartsPerTypeGrid({
+  data,
+  qtyByKey: qtyByKeyProp,
+  setQty: setQtyProp,
+  checkedByKey: checkedByKeyProp,
+  setChecked: setCheckedProp,
+}) {
   const rows = Array.isArray(data) ? data : [];
   const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
-  const [qtyByKey, setQtyByKey] = useState({});
-  const [checkedByKey, setCheckedByKey] = useState({});
+  const [qtyByKeyInternal, setQtyByKeyInternal] = useState({});
+  const [checkedByKeyInternal, setCheckedByKeyInternal] = useState({});
 
-  const setQty = useCallback((key, value) => {
+  const qtyByKey = qtyByKeyProp ?? qtyByKeyInternal;
+  const checkedByKey = checkedByKeyProp ?? checkedByKeyInternal;
+
+  const setQtyInternal = useCallback((key, value) => {
     const next = value === "" ? "" : String(value);
-    setQtyByKey((prev) => ({ ...prev, [key]: next }));
+    setQtyByKeyInternal((prev) => ({ ...prev, [key]: next }));
+  }, []);
+  const setCheckedInternal = useCallback((key, value) => {
+    setCheckedByKeyInternal((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const setChecked = useCallback((key, value) => {
-    setCheckedByKey((prev) => ({ ...prev, [key]: value }));
-  }, []);
+  const setQty = setQtyProp ?? setQtyInternal;
+  const setChecked = setCheckedProp ?? setCheckedInternal;
 
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">

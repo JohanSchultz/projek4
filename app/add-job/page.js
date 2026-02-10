@@ -72,6 +72,60 @@ async function fetchItemsPerType(typeId) {
   }
 }
 
+async function insertJob(
+  p_equipmentitems_id,
+  p_technician_id,
+  p_datein,
+  p_dateout,
+  p_comments
+) {
+  "use server";
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("insert_job", {
+      p_equipmentitems_id: Number(p_equipmentitems_id) || null,
+      p_technician_id: Number(p_technician_id) || null,
+      p_datein: p_datein || null,
+      p_dateout: p_dateout || null,
+      p_comments: p_comments ?? null,
+    });
+    if (error) throw error;
+    const result =
+      typeof data === "number"
+        ? data
+        : data?.insert_job ?? (Array.isArray(data) ? data[0]?.insert_job : null);
+    return { insertJob: result ?? null, error: null };
+  } catch (err) {
+    return { insertJob: null, error: err?.message ?? String(err) };
+  }
+}
+
+async function insertPartsPerJob(
+  p_equipmentitems_id,
+  p_job_id,
+  p_part_id,
+  p_qty,
+  p_unitcost,
+  p_isdamaged
+) {
+  "use server";
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("insert_partsperjob", {
+      p_equipmentitems_id: Number(p_equipmentitems_id) || null,
+      p_job_id: Number(p_job_id) || null,
+      p_part_id: Number(p_part_id) ?? null,
+      p_qty: Math.floor(Number(p_qty)) || 0,
+      p_unitcost: Number(p_unitcost) ?? 0,
+      p_isdamaged: Boolean(p_isdamaged),
+    });
+    if (error) throw error;
+    return { error: null };
+  } catch (err) {
+    return { error: err?.message ?? String(err) };
+  }
+}
+
 export default async function AddJobPage() {
   const { data: equipmentTypes, error: typesError } =
     await getEquipmentTypes();
@@ -126,6 +180,8 @@ export default async function AddJobPage() {
           initialPartsData={initialParts}
           fetchPartsByTypeId={fetchPartsByTypeId}
           fetchItemsPerType={fetchItemsPerType}
+          insertJob={insertJob}
+          insertPartsPerJob={insertPartsPerJob}
         />
       </main>
     </div>

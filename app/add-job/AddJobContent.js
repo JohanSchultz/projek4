@@ -1,10 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useCallback } from "react";
 import { PartsPerTypeGrid } from "./PartsPerTypeGrid";
 
 function itemDisplayLabel(item) {
   return item.serial_no ?? item.serialno ?? item.descr ?? item.id ?? "—";
+}
+
+function gridRowKey(row, index) {
+  return row.id != null ? String(row.id) : `row-${index}`;
+}
+
+function numericVal(val) {
+  if (val == null || val === "") return 0;
+  const n = Number(val);
+  return Number.isNaN(n) ? 0 : n;
 }
 
 export function AddJobContent({
@@ -13,6 +23,8 @@ export function AddJobContent({
   initialPartsData,
   fetchPartsByTypeId,
   fetchItemsPerType,
+  insertJob: insertJobAction,
+  insertPartsPerJob: insertPartsPerJobAction,
 }) {
   const types = equipmentTypes ?? [];
   const techList = technicians ?? [];
@@ -24,8 +36,21 @@ export function AddJobContent({
   const [outDate, setOutDate] = useState("");
   const [comments, setComments] = useState("");
   const [gridData, setGridData] = useState([]);
+  const [qtyByKey, setQtyByKey] = useState({});
+  const [checkedByKey, setCheckedByKey] = useState({});
   const [error, setError] = useState(null);
   const [isPending, startTransition] = useTransition();
+  const [insertJobResult, setInsertJobResult] = useState(null);
+  const [saveError, setSaveError] = useState(null);
+  const [savePending, startSaveTransition] = useTransition();
+
+  const setQty = useCallback((key, value) => {
+    const next = value === "" ? "" : String(value);
+    setQtyByKey((prev) => ({ ...prev, [key]: next }));
+  }, []);
+  const setChecked = useCallback((key, value) => {
+    setCheckedByKey((prev) => ({ ...prev, [key]: value }));
+  }, []);
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -36,6 +61,8 @@ export function AddJobContent({
     if (id == null || id === 0) {
       setGridData([]);
       setItemsList([]);
+      setQtyByKey({});
+      setCheckedByKey({});
       return;
     }
     startTransition(async () => {
@@ -48,6 +75,8 @@ export function AddJobContent({
         setGridData([]);
       } else {
         setGridData(Array.isArray(partsResult?.data) ? partsResult.data : []);
+        setQtyByKey({});
+        setCheckedByKey({});
       }
       if (itemsResult?.error) {
         setItemsList([]);
@@ -197,7 +226,79 @@ export function AddJobContent({
         <p className="text-sm text-zinc-500 dark:text-zinc-400">No data.</p>
       )}
       {!error && !isPending && gridData.length > 0 && (
-        <PartsPerTypeGrid data={gridData} />
+        <PartsPerTypeGrid
+          data={gridData}
+          qtyByKey={qtyByKey}
+          setQty={setQty}
+          checkedByKey={checkedByKey}
+          setChecked={setChecked}
+        />
+      )}
+
+      <div className="mt-8 flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          onClick={() => {
+            setSaveError(null);
+            startSaveTransition(async () => {
+              const result = await insertJobAction(
+                selectedSerialId || null,
+                selectedTechnicianId || null,
+                inDate || null,
+                outDate || null,
+                comments ?? ""
+              );
+              if (result?.error) {
+                setSaveError(result.error);
+                setInsertJobResult(null);
+                return;
+              }
+              const jobId = result?.insertJob ?? null;
+              setInsertJobResult(jobId);
+              if (jobId == null) return;
+              for (let i = 0; i < gridData.length; i++) {
+                const row = gridData[i];
+                const key = gridRowKey(row, i);
+                const qty = numericVal(qtyByKey[key]);
+                if (qty <= 0) continue;
+                const partId = row.partid != null ? row.partid : null;
+                const unitCost = numericVal(row.costa);
+                const isDamaged = !!checkedByKey[key];
+                const partResult = await insertPartsPerJobAction(
+                  selectedSerialId || null,
+                  jobId,
+                  partId,
+                  Math.floor(qty),
+                  unitCost,
+                  isDamaged
+                );
+                if (partResult?.error) {
+                  setSaveError(partResult.error);
+                  break;
+                }
+              }
+            });
+          }}
+          disabled={savePending}
+          className="rounded border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+        >
+          {savePending ? "Saving…" : "Save Job"}
+        </button>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            readOnly
+            value={insertJobResult != null ? String(insertJobResult) : ""}
+            className="w-32 rounded border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 dark:border-zinc-600 dark:bg-zinc-800/50 dark:text-zinc-200"
+            placeholder="—"
+            aria-label="Insert job result"
+          />
+        </div>
+      </div>
+      {saveError && (
+        <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
+          {saveError}
+        </p>
       )}
     </>
   );
