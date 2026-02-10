@@ -55,9 +55,12 @@ export default function MenuPage() {
                   </Link>
                 </li>
                 <li role="treeitem">
-                  <span className="block rounded px-2 py-1.5 text-sm font-medium text-zinc-800 bg-[#FFE4B5] hover:bg-[#FFDAB9] dark:bg-[#FFE4B5] dark:text-zinc-800 dark:hover:bg-[#FFDAB9]">
+                  <Link
+                    href="/equipment_types"
+                    className="block rounded px-2 py-1.5 text-sm font-medium text-zinc-800 bg-[#FFE4B5] hover:bg-[#FFDAB9] dark:bg-[#FFE4B5] dark:text-zinc-800 dark:hover:bg-[#FFDAB9]"
+                  >
                     Equipment Types
-                  </span>
+                  </Link>
                 </li>
                 <li role="treeitem">
                   <span className="block rounded px-2 py-1.5 text-sm font-medium text-zinc-800 bg-[#FFE4B5] hover:bg-[#FFDAB9] dark:bg-[#FFE4B5] dark:text-zinc-800 dark:hover:bg-[#FFDAB9]">
@@ -92,6 +95,14 @@ export default function MenuPage() {
                     className="block rounded px-2 py-1.5 text-sm font-medium text-zinc-800 bg-[#FFE4B5] hover:bg-[#FFDAB9] dark:bg-[#FFE4B5] dark:text-zinc-800 dark:hover:bg-[#FFDAB9]"
                   >
                     Equipment List
+                  </Link>
+                </li>
+                <li role="treeitem">
+                  <Link
+                    href="/report_servicelist"
+                    className="block rounded px-2 py-1.5 text-sm font-medium text-zinc-800 bg-[#FFE4B5] hover:bg-[#FFDAB9] dark:bg-[#FFE4B5] dark:text-zinc-800 dark:hover:bg-[#FFDAB9]"
+                  >
+                    Service list
                   </Link>
                 </li>
               </ul>

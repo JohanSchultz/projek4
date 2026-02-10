@@ -289,7 +289,7 @@ export function AddJobContent({
             type="text"
             readOnly
             value={insertJobResult != null ? String(insertJobResult) : ""}
-            className="w-32 rounded border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 dark:border-zinc-600 dark:bg-zinc-800/50 dark:text-zinc-200"
+            className="invisible w-0 max-w-0 h-0 overflow-hidden p-0 border-0"
             placeholder="—"
             aria-label="Insert job result"
           />
