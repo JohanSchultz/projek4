@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect, useRef } from "react";
-import { AllequipmenttypesGrid } from "./AllequipmenttypesGrid";
+import { AllsectionsGrid } from "./AllsectionsGrid";
 
 const inputClass =
   "rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:focus:border-zinc-400 dark:focus:ring-zinc-400";
@@ -10,25 +10,31 @@ const selectClass =
 const checkboxClass =
   "h-4 w-4 rounded border-zinc-300 text-zinc-600 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:focus:ring-zinc-400";
 
-export function EquipmentTypesContent({
-  categories,
-  insertEquipmentType,
-  updateEquipmentType,
-  fetchAllequipmenttypes,
+export function SectionsContent({
+  mines,
+  fetchShaftsByMineId,
+  insertSection,
+  updateSection,
+  fetchAllSections,
 }) {
-  const categoryList = categories ?? [];
-  const [categoryId, setCategoryId] = useState(0);
+  const mineList = mines ?? [];
+  const [mineId, setMineId] = useState(0);
+  const [shaftId, setShaftId] = useState(0);
   const [descr, setDescr] = useState("");
+  const [costcode, setCostcode] = useState("");
   const [isactive, setIsactive] = useState(true);
   const [selectedRowId, setSelectedRowId] = useState(null);
   const [gridData, setGridData] = useState([]);
+  const [shaftsList, setShaftsList] = useState([]);
+  const [pendingShaftId, setPendingShaftId] = useState(null);
   const [saveError, setSaveError] = useState(null);
   const [isPending, startTransition] = useTransition();
-  const categorySelectRef = useRef(null);
+  const mineSelectRef = useRef(null);
+  const shaftSelectRef = useRef(null);
 
   const loadGrid = () => {
-    if (typeof fetchAllequipmenttypes !== "function") return;
-    fetchAllequipmenttypes().then((res) => {
+    if (typeof fetchAllSections !== "function") return;
+    fetchAllSections().then((res) => {
       setGridData(Array.isArray(res?.data) ? res.data : []);
     });
   };
@@ -38,28 +44,61 @@ export function EquipmentTypesContent({
   }, []);
 
   useEffect(() => {
-    if (selectedRowId == null || categorySelectRef.current == null) return;
-    const sel = categorySelectRef.current;
+    if (typeof fetchShaftsByMineId !== "function") {
+      setShaftsList([]);
+      return;
+    }
+    let cancelled = false;
+    fetchShaftsByMineId(mineId).then((res) => {
+      if (!cancelled && res?.data) setShaftsList(res.data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mineId, fetchShaftsByMineId]);
+
+  useEffect(() => {
+    setShaftId(0);
+  }, [mineId]);
+
+  useEffect(() => {
+    if (pendingShaftId != null && shaftsList.some((s) => s.id === pendingShaftId)) {
+      setShaftId(pendingShaftId);
+      setPendingShaftId(null);
+    }
+  }, [shaftsList, pendingShaftId]);
+
+  useEffect(() => {
+    if (selectedRowId == null || mineSelectRef.current == null) return;
+    const sel = mineSelectRef.current;
     const option = sel.options[sel.selectedIndex];
     if (option) option.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [selectedRowId, categoryId]);
+  }, [selectedRowId, mineId]);
+
+  useEffect(() => {
+    if (selectedRowId == null || shaftSelectRef.current == null) return;
+    const sel = shaftSelectRef.current;
+    const option = sel.options[sel.selectedIndex];
+    if (option) option.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedRowId, shaftId]);
 
   const handleSave = () => {
     setSaveError(null);
-    const equipmentcategories_id = categoryId === 0 ? null : categoryId;
-    if (equipmentcategories_id == null) {
-      setSaveError("Please select an equipment category.");
+    const sid = shaftId === 0 ? null : shaftId;
+    if (sid == null) {
+      setSaveError("Please select a shaft.");
       return;
     }
     const trimmedDescr = descr.trim();
     if (!trimmedDescr) {
-      setSaveError("Equipment type is required.");
+      setSaveError("Section is required.");
       return;
     }
     startTransition(async () => {
-      const result = await insertEquipmentType(
-        equipmentcategories_id,
+      const result = await insertSection(
+        sid,
         trimmedDescr,
+        costcode.trim(),
         isactive
       );
       if (result?.error) {
@@ -67,6 +106,7 @@ export function EquipmentTypesContent({
         return;
       }
       setDescr("");
+      setCostcode("");
       loadGrid();
     });
   };
@@ -74,37 +114,43 @@ export function EquipmentTypesContent({
   const handleRowClick = (row) => {
     setSaveError(null);
     setSelectedRowId(row.id ?? null);
-    setCategoryId(row.equipmentcategories_id ?? 0);
-    setDescr(row.equipmenttype ?? "");
+    setMineId(row.mine_id ?? 0);
+    setPendingShaftId(row.shaft_id ?? 0);
+    setDescr(row.descr ?? row.section ?? "");
+    setCostcode(row.costcode ?? "");
     setIsactive(row.isactive ?? false);
   };
 
   const handleNew = () => {
     setSaveError(null);
     setSelectedRowId(null);
-    setCategoryId(0);
+    setMineId(0);
+    setShaftId(0);
+    setPendingShaftId(null);
     setDescr("");
+    setCostcode("");
     setIsactive(true);
   };
 
   const handleChange = () => {
     if (selectedRowId == null) return;
     setSaveError(null);
-    const equipmentcategories_id = categoryId === 0 ? null : categoryId;
-    if (equipmentcategories_id == null) {
-      setSaveError("Please select an equipment category.");
+    const sid = shaftId === 0 ? null : shaftId;
+    if (sid == null) {
+      setSaveError("Please select a shaft.");
       return;
     }
     const trimmedDescr = descr.trim();
     if (!trimmedDescr) {
-      setSaveError("Equipment type is required.");
+      setSaveError("Section is required.");
       return;
     }
     startTransition(async () => {
-      const result = await updateEquipmentType(
+      const result = await updateSection(
         selectedRowId,
-        equipmentcategories_id,
+        sid,
         trimmedDescr,
+        costcode.trim(),
         isactive
       );
       if (result?.error) {
@@ -120,8 +166,9 @@ export function EquipmentTypesContent({
     if (selectedRowId == null) return;
     setSaveError(null);
     startTransition(async () => {
-      const result = await updateEquipmentType(
+      const result = await updateSection(
         selectedRowId,
+        null,
         null,
         null,
         false
@@ -140,40 +187,80 @@ export function EquipmentTypesContent({
       <div className="mb-6 flex flex-wrap items-end gap-6">
         <div>
           <label
-            htmlFor="equipment-category"
+            htmlFor="section-mine"
             className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
-            Equipment categories
+            Mine
           </label>
           <select
-            ref={categorySelectRef}
-            id="equipment-category"
-            value={categoryId == null ? "" : categoryId}
+            ref={mineSelectRef}
+            id="section-mine"
+            value={mineId == null ? "" : mineId}
             onChange={(e) =>
-              setCategoryId(e.target.value === "" ? 0 : Number(e.target.value))
+              setMineId(e.target.value === "" ? 0 : Number(e.target.value))
             }
             className={selectClass}
           >
             <option value={0}>   -  SELECT  - </option>
-            {categoryList.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.descr ?? c.id}
+            {mineList.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.descr ?? m.id}
               </option>
             ))}
           </select>
         </div>
         <div>
           <label
-            htmlFor="equipment-type-descr"
+            htmlFor="section-shaft"
             className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
-            Equipment type
+            Shaft
+          </label>
+          <select
+            ref={shaftSelectRef}
+            id="section-shaft"
+            value={shaftId == null ? "" : shaftId}
+            onChange={(e) =>
+              setShaftId(e.target.value === "" ? 0 : Number(e.target.value))
+            }
+            className={selectClass}
+          >
+            <option value={0}>   -  SELECT  - </option>
+            {shaftsList.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.descr ?? s.id}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="section-descr"
+            className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Section
           </label>
           <input
             type="text"
-            id="equipment-type-descr"
+            id="section-descr"
             value={descr}
             onChange={(e) => setDescr(e.target.value)}
+            className={inputClass}
+            placeholder=""
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="section-costcode"
+            className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Cost Code
+          </label>
+          <input
+            type="text"
+            id="section-costcode"
+            value={costcode}
+            onChange={(e) => setCostcode(e.target.value)}
             className={inputClass}
             placeholder=""
           />
@@ -181,13 +268,13 @@ export function EquipmentTypesContent({
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
-            id="equipment-type-active"
+            id="section-active"
             checked={isactive}
             onChange={(e) => setIsactive(e.target.checked)}
             className={checkboxClass}
           />
           <label
-            htmlFor="equipment-type-active"
+            htmlFor="section-active"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Active
@@ -261,7 +348,7 @@ export function EquipmentTypesContent({
       )}
       <hr className="my-4 border-zinc-200 dark:border-zinc-700" />
       <div>
-        <AllequipmenttypesGrid data={gridData} onRowClick={handleRowClick} />
+        <AllsectionsGrid data={gridData} onRowClick={handleRowClick} />
       </div>
     </>
   );

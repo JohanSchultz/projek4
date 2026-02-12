@@ -1,28 +1,34 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
-import { EquipmentcategoriesGrid } from "./EquipmentcategoriesGrid";
+import { useState, useTransition, useEffect, useRef } from "react";
+import { AllshaftsGrid } from "./AllshaftsGrid";
 
 const inputClass =
+  "rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:focus:border-zinc-400 dark:focus:ring-zinc-400";
+const selectClass =
   "rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:focus:border-zinc-400 dark:focus:ring-zinc-400";
 const checkboxClass =
   "h-4 w-4 rounded border-zinc-300 text-zinc-600 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:focus:ring-zinc-400";
 
-export function EquipmentCategoriesContent({
-  insertEquipmentCategory,
-  updateEquipmentCategory,
-  fetchAllEquipmentCategories,
+export function ShaftsContent({
+  mines,
+  insertShaft,
+  updateShaft,
+  fetchAllShafts,
 }) {
+  const mineList = mines ?? [];
+  const [mineId, setMineId] = useState(0);
   const [descr, setDescr] = useState("");
   const [isactive, setIsactive] = useState(true);
   const [selectedRowId, setSelectedRowId] = useState(null);
   const [gridData, setGridData] = useState([]);
   const [saveError, setSaveError] = useState(null);
   const [isPending, startTransition] = useTransition();
+  const mineSelectRef = useRef(null);
 
   const loadGrid = () => {
-    if (typeof fetchAllEquipmentCategories !== "function") return;
-    fetchAllEquipmentCategories().then((res) => {
+    if (typeof fetchAllShafts !== "function") return;
+    fetchAllShafts().then((res) => {
       setGridData(Array.isArray(res?.data) ? res.data : []);
     });
   };
@@ -31,21 +37,32 @@ export function EquipmentCategoriesContent({
     loadGrid();
   }, []);
 
+  useEffect(() => {
+    if (selectedRowId == null || mineSelectRef.current == null) return;
+    const sel = mineSelectRef.current;
+    const option = sel.options[sel.selectedIndex];
+    if (option) option.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedRowId, mineId]);
+
   const handleSave = () => {
     setSaveError(null);
+    const mine_id = mineId === 0 ? null : mineId;
+    if (mine_id == null) {
+      setSaveError("Please select a mine.");
+      return;
+    }
     const trimmedDescr = descr.trim();
     if (!trimmedDescr) {
-      setSaveError("Equipment category is required.");
+      setSaveError("Shaft description is required.");
       return;
     }
     startTransition(async () => {
-      const result = await insertEquipmentCategory(trimmedDescr, isactive);
+      const result = await insertShaft(mine_id, trimmedDescr, isactive);
       if (result?.error) {
         setSaveError(result.error);
         return;
       }
       setDescr("");
-      setIsactive(true);
       loadGrid();
     });
   };
@@ -53,13 +70,15 @@ export function EquipmentCategoriesContent({
   const handleRowClick = (row) => {
     setSaveError(null);
     setSelectedRowId(row.id ?? null);
-    setDescr(row.descr ?? "");
+    setMineId(row.mine_id ?? 0);
+    setDescr(row.shaft ?? "");
     setIsactive(row.isactive ?? false);
   };
 
   const handleNew = () => {
     setSaveError(null);
     setSelectedRowId(null);
+    setMineId(0);
     setDescr("");
     setIsactive(true);
   };
@@ -67,14 +86,20 @@ export function EquipmentCategoriesContent({
   const handleChange = () => {
     if (selectedRowId == null) return;
     setSaveError(null);
+    const mine_id = mineId === 0 ? null : mineId;
+    if (mine_id == null) {
+      setSaveError("Please select a mine.");
+      return;
+    }
     const trimmedDescr = descr.trim();
     if (!trimmedDescr) {
-      setSaveError("Equipment category is required.");
+      setSaveError("Shaft description is required.");
       return;
     }
     startTransition(async () => {
-      const result = await updateEquipmentCategory(
+      const result = await updateShaft(
         selectedRowId,
+        mine_id,
         trimmedDescr,
         isactive
       );
@@ -91,11 +116,7 @@ export function EquipmentCategoriesContent({
     if (selectedRowId == null) return;
     setSaveError(null);
     startTransition(async () => {
-      const result = await updateEquipmentCategory(
-        selectedRowId,
-        null,
-        false
-      );
+      const result = await updateShaft(selectedRowId, null, null, false);
       if (result?.error) {
         setSaveError(result.error);
         return;
@@ -110,14 +131,38 @@ export function EquipmentCategoriesContent({
       <div className="mb-6 flex flex-wrap items-end gap-6">
         <div>
           <label
-            htmlFor="equipment-categories-descr"
+            htmlFor="shaft-mine"
             className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
-            Equipment category
+            Mine
+          </label>
+          <select
+            ref={mineSelectRef}
+            id="shaft-mine"
+            value={mineId == null ? "" : mineId}
+            onChange={(e) =>
+              setMineId(e.target.value === "" ? 0 : Number(e.target.value))
+            }
+            className={selectClass}
+          >
+            <option value={0}>   -  SELECT  - </option>
+            {mineList.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.descr ?? m.id}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="shaft-descr"
+            className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Shaft
           </label>
           <input
             type="text"
-            id="equipment-categories-descr"
+            id="shaft-descr"
             value={descr}
             onChange={(e) => setDescr(e.target.value)}
             className={inputClass}
@@ -127,17 +172,27 @@ export function EquipmentCategoriesContent({
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
-            id="equipment-category-active"
+            id="shaft-active"
             checked={isactive}
             onChange={(e) => setIsactive(e.target.checked)}
             className={checkboxClass}
           />
           <label
-            htmlFor="equipment-category-active"
+            htmlFor="shaft-active"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Active
           </label>
+        </div>
+        <div className="hidden">
+          <input
+            type="text"
+            readOnly
+            value={selectedRowId != null ? String(selectedRowId) : ""}
+            className="w-20 rounded border border-zinc-300 bg-zinc-50 px-2 py-2 text-sm text-zinc-800 dark:border-zinc-600 dark:bg-zinc-800/50 dark:text-zinc-200"
+            placeholder="—"
+            aria-label="Selected ID"
+          />
         </div>
       </div>
       <hr className="my-4 border-zinc-200 dark:border-zinc-700" />
@@ -197,7 +252,7 @@ export function EquipmentCategoriesContent({
       )}
       <hr className="my-4 border-zinc-200 dark:border-zinc-700" />
       <div>
-        <EquipmentcategoriesGrid data={gridData} onRowClick={handleRowClick} />
+        <AllshaftsGrid data={gridData} onRowClick={handleRowClick} />
       </div>
     </>
   );

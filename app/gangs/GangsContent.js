@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect, useRef } from "react";
-import { AllequipmenttypesGrid } from "./AllequipmenttypesGrid";
+import { AllgangsGrid } from "./AllgangsGrid";
 
 const inputClass =
   "rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:focus:border-zinc-400 dark:focus:ring-zinc-400";
@@ -10,25 +10,35 @@ const selectClass =
 const checkboxClass =
   "h-4 w-4 rounded border-zinc-300 text-zinc-600 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:focus:ring-zinc-400";
 
-export function EquipmentTypesContent({
-  categories,
-  insertEquipmentType,
-  updateEquipmentType,
-  fetchAllequipmenttypes,
+export function GangsContent({
+  mines,
+  fetchShaftsByMineId,
+  fetchSectionsByShaftId,
+  insertGang,
+  updateGang,
+  fetchAllGangs,
 }) {
-  const categoryList = categories ?? [];
-  const [categoryId, setCategoryId] = useState(0);
+  const mineList = mines ?? [];
+  const [mineId, setMineId] = useState(0);
+  const [shaftId, setShaftId] = useState(0);
+  const [sectionId, setSectionId] = useState(0);
   const [descr, setDescr] = useState("");
   const [isactive, setIsactive] = useState(true);
   const [selectedRowId, setSelectedRowId] = useState(null);
   const [gridData, setGridData] = useState([]);
+  const [shaftsList, setShaftsList] = useState([]);
+  const [sectionsList, setSectionsList] = useState([]);
+  const [pendingShaftId, setPendingShaftId] = useState(null);
+  const [pendingSectionId, setPendingSectionId] = useState(null);
   const [saveError, setSaveError] = useState(null);
   const [isPending, startTransition] = useTransition();
-  const categorySelectRef = useRef(null);
+  const mineSelectRef = useRef(null);
+  const shaftSelectRef = useRef(null);
+  const sectionSelectRef = useRef(null);
 
   const loadGrid = () => {
-    if (typeof fetchAllequipmenttypes !== "function") return;
-    fetchAllequipmenttypes().then((res) => {
+    if (typeof fetchAllGangs !== "function") return;
+    fetchAllGangs().then((res) => {
       setGridData(Array.isArray(res?.data) ? res.data : []);
     });
   };
@@ -38,30 +48,90 @@ export function EquipmentTypesContent({
   }, []);
 
   useEffect(() => {
-    if (selectedRowId == null || categorySelectRef.current == null) return;
-    const sel = categorySelectRef.current;
+    if (typeof fetchShaftsByMineId !== "function") {
+      setShaftsList([]);
+      return;
+    }
+    let cancelled = false;
+    fetchShaftsByMineId(mineId).then((res) => {
+      if (!cancelled && res?.data) setShaftsList(res.data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mineId, fetchShaftsByMineId]);
+
+  useEffect(() => {
+    if (typeof fetchSectionsByShaftId !== "function") {
+      setSectionsList([]);
+      return;
+    }
+    let cancelled = false;
+    fetchSectionsByShaftId(shaftId).then((res) => {
+      if (!cancelled && res?.data) setSectionsList(res.data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [shaftId, fetchSectionsByShaftId]);
+
+  useEffect(() => {
+    setShaftId(0);
+  }, [mineId]);
+
+  useEffect(() => {
+    setSectionId(0);
+  }, [shaftId]);
+
+  useEffect(() => {
+    if (pendingShaftId != null && shaftsList.some((s) => s.id === pendingShaftId)) {
+      setShaftId(pendingShaftId);
+      setPendingShaftId(null);
+    }
+  }, [shaftsList, pendingShaftId]);
+
+  useEffect(() => {
+    if (pendingSectionId != null && sectionsList.some((s) => s.id === pendingSectionId)) {
+      setSectionId(pendingSectionId);
+      setPendingSectionId(null);
+    }
+  }, [sectionsList, pendingSectionId]);
+
+  useEffect(() => {
+    if (selectedRowId == null || mineSelectRef.current == null) return;
+    const sel = mineSelectRef.current;
     const option = sel.options[sel.selectedIndex];
     if (option) option.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [selectedRowId, categoryId]);
+  }, [selectedRowId, mineId]);
+
+  useEffect(() => {
+    if (selectedRowId == null || shaftSelectRef.current == null) return;
+    const sel = shaftSelectRef.current;
+    const option = sel.options[sel.selectedIndex];
+    if (option) option.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedRowId, shaftId]);
+
+  useEffect(() => {
+    if (selectedRowId == null || sectionSelectRef.current == null) return;
+    const sel = sectionSelectRef.current;
+    const option = sel.options[sel.selectedIndex];
+    if (option) option.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedRowId, sectionId]);
 
   const handleSave = () => {
     setSaveError(null);
-    const equipmentcategories_id = categoryId === 0 ? null : categoryId;
-    if (equipmentcategories_id == null) {
-      setSaveError("Please select an equipment category.");
+    const sid = sectionId === 0 ? null : sectionId;
+    if (sid == null) {
+      setSaveError("Please select a section.");
       return;
     }
     const trimmedDescr = descr.trim();
     if (!trimmedDescr) {
-      setSaveError("Equipment type is required.");
+      setSaveError("Gang is required.");
       return;
     }
     startTransition(async () => {
-      const result = await insertEquipmentType(
-        equipmentcategories_id,
-        trimmedDescr,
-        isactive
-      );
+      const result = await insertGang(sid, trimmedDescr, isactive);
       if (result?.error) {
         setSaveError(result.error);
         return;
@@ -74,15 +144,21 @@ export function EquipmentTypesContent({
   const handleRowClick = (row) => {
     setSaveError(null);
     setSelectedRowId(row.id ?? null);
-    setCategoryId(row.equipmentcategories_id ?? 0);
-    setDescr(row.equipmenttype ?? "");
+    setMineId(row.mine_id ?? 0);
+    setPendingShaftId(row.shaft_id ?? 0);
+    setPendingSectionId(row.section_id ?? 0);
+    setDescr(row.descr ?? row.gang ?? "");
     setIsactive(row.isactive ?? false);
   };
 
   const handleNew = () => {
     setSaveError(null);
     setSelectedRowId(null);
-    setCategoryId(0);
+    setMineId(0);
+    setShaftId(0);
+    setSectionId(0);
+    setPendingShaftId(null);
+    setPendingSectionId(null);
     setDescr("");
     setIsactive(true);
   };
@@ -90,20 +166,20 @@ export function EquipmentTypesContent({
   const handleChange = () => {
     if (selectedRowId == null) return;
     setSaveError(null);
-    const equipmentcategories_id = categoryId === 0 ? null : categoryId;
-    if (equipmentcategories_id == null) {
-      setSaveError("Please select an equipment category.");
+    const sid = sectionId === 0 ? null : sectionId;
+    if (sid == null) {
+      setSaveError("Please select a section.");
       return;
     }
     const trimmedDescr = descr.trim();
     if (!trimmedDescr) {
-      setSaveError("Equipment type is required.");
+      setSaveError("Gang is required.");
       return;
     }
     startTransition(async () => {
-      const result = await updateEquipmentType(
+      const result = await updateGang(
         selectedRowId,
-        equipmentcategories_id,
+        sid,
         trimmedDescr,
         isactive
       );
@@ -120,7 +196,7 @@ export function EquipmentTypesContent({
     if (selectedRowId == null) return;
     setSaveError(null);
     startTransition(async () => {
-      const result = await updateEquipmentType(
+      const result = await updateGang(
         selectedRowId,
         null,
         null,
@@ -140,38 +216,86 @@ export function EquipmentTypesContent({
       <div className="mb-6 flex flex-wrap items-end gap-6">
         <div>
           <label
-            htmlFor="equipment-category"
+            htmlFor="gang-mine"
             className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
-            Equipment categories
+            Mine
           </label>
           <select
-            ref={categorySelectRef}
-            id="equipment-category"
-            value={categoryId == null ? "" : categoryId}
+            ref={mineSelectRef}
+            id="gang-mine"
+            value={mineId == null ? "" : mineId}
             onChange={(e) =>
-              setCategoryId(e.target.value === "" ? 0 : Number(e.target.value))
+              setMineId(e.target.value === "" ? 0 : Number(e.target.value))
             }
             className={selectClass}
           >
             <option value={0}>   -  SELECT  - </option>
-            {categoryList.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.descr ?? c.id}
+            {mineList.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.descr ?? m.id}
               </option>
             ))}
           </select>
         </div>
         <div>
           <label
-            htmlFor="equipment-type-descr"
+            htmlFor="gang-shaft"
             className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
-            Equipment type
+            Shaft
+          </label>
+          <select
+            ref={shaftSelectRef}
+            id="gang-shaft"
+            value={shaftId == null ? "" : shaftId}
+            onChange={(e) =>
+              setShaftId(e.target.value === "" ? 0 : Number(e.target.value))
+            }
+            className={selectClass}
+          >
+            <option value={0}>   -  SELECT  - </option>
+            {shaftsList.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.descr ?? s.id}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="gang-section"
+            className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Section
+          </label>
+          <select
+            ref={sectionSelectRef}
+            id="gang-section"
+            value={sectionId == null ? "" : sectionId}
+            onChange={(e) =>
+              setSectionId(e.target.value === "" ? 0 : Number(e.target.value))
+            }
+            className={selectClass}
+          >
+            <option value={0}>   -  SELECT  - </option>
+            {sectionsList.map((sec) => (
+              <option key={sec.id} value={sec.id}>
+                {sec.descr ?? sec.id}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="gang-descr"
+            className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Gang
           </label>
           <input
             type="text"
-            id="equipment-type-descr"
+            id="gang-descr"
             value={descr}
             onChange={(e) => setDescr(e.target.value)}
             className={inputClass}
@@ -181,13 +305,13 @@ export function EquipmentTypesContent({
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
-            id="equipment-type-active"
+            id="gang-active"
             checked={isactive}
             onChange={(e) => setIsactive(e.target.checked)}
             className={checkboxClass}
           />
           <label
-            htmlFor="equipment-type-active"
+            htmlFor="gang-active"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Active
@@ -261,7 +385,7 @@ export function EquipmentTypesContent({
       )}
       <hr className="my-4 border-zinc-200 dark:border-zinc-700" />
       <div>
-        <AllequipmenttypesGrid data={gridData} onRowClick={handleRowClick} />
+        <AllgangsGrid data={gridData} onRowClick={handleRowClick} />
       </div>
     </>
   );

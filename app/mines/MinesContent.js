@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { EquipmentcategoriesGrid } from "./EquipmentcategoriesGrid";
+import { MinesGrid } from "./MinesGrid";
 
 const inputClass =
   "rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:focus:border-zinc-400 dark:focus:ring-zinc-400";
 const checkboxClass =
   "h-4 w-4 rounded border-zinc-300 text-zinc-600 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:focus:ring-zinc-400";
 
-export function EquipmentCategoriesContent({
-  insertEquipmentCategory,
-  updateEquipmentCategory,
-  fetchAllEquipmentCategories,
+export function MinesContent({
+  insertMine,
+  updateMine,
+  fetchAllMines,
 }) {
   const [descr, setDescr] = useState("");
   const [isactive, setIsactive] = useState(true);
@@ -21,8 +21,8 @@ export function EquipmentCategoriesContent({
   const [isPending, startTransition] = useTransition();
 
   const loadGrid = () => {
-    if (typeof fetchAllEquipmentCategories !== "function") return;
-    fetchAllEquipmentCategories().then((res) => {
+    if (typeof fetchAllMines !== "function") return;
+    fetchAllMines().then((res) => {
       setGridData(Array.isArray(res?.data) ? res.data : []);
     });
   };
@@ -35,11 +35,11 @@ export function EquipmentCategoriesContent({
     setSaveError(null);
     const trimmedDescr = descr.trim();
     if (!trimmedDescr) {
-      setSaveError("Equipment category is required.");
+      setSaveError("Mine is required.");
       return;
     }
     startTransition(async () => {
-      const result = await insertEquipmentCategory(trimmedDescr, isactive);
+      const result = await insertMine(trimmedDescr, isactive);
       if (result?.error) {
         setSaveError(result.error);
         return;
@@ -69,11 +69,11 @@ export function EquipmentCategoriesContent({
     setSaveError(null);
     const trimmedDescr = descr.trim();
     if (!trimmedDescr) {
-      setSaveError("Equipment category is required.");
+      setSaveError("Mine is required.");
       return;
     }
     startTransition(async () => {
-      const result = await updateEquipmentCategory(
+      const result = await updateMine(
         selectedRowId,
         trimmedDescr,
         isactive
@@ -91,7 +91,7 @@ export function EquipmentCategoriesContent({
     if (selectedRowId == null) return;
     setSaveError(null);
     startTransition(async () => {
-      const result = await updateEquipmentCategory(
+      const result = await updateMine(
         selectedRowId,
         null,
         false
@@ -110,14 +110,14 @@ export function EquipmentCategoriesContent({
       <div className="mb-6 flex flex-wrap items-end gap-6">
         <div>
           <label
-            htmlFor="equipment-categories-descr"
+            htmlFor="mines-descr"
             className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
-            Equipment category
+            Mine
           </label>
           <input
             type="text"
-            id="equipment-categories-descr"
+            id="mines-descr"
             value={descr}
             onChange={(e) => setDescr(e.target.value)}
             className={inputClass}
@@ -127,13 +127,13 @@ export function EquipmentCategoriesContent({
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
-            id="equipment-category-active"
+            id="mine-active"
             checked={isactive}
             onChange={(e) => setIsactive(e.target.checked)}
             className={checkboxClass}
           />
           <label
-            htmlFor="equipment-category-active"
+            htmlFor="mine-active"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Active
@@ -197,7 +197,7 @@ export function EquipmentCategoriesContent({
       )}
       <hr className="my-4 border-zinc-200 dark:border-zinc-700" />
       <div>
-        <EquipmentcategoriesGrid data={gridData} onRowClick={handleRowClick} />
+        <MinesGrid data={gridData} onRowClick={handleRowClick} />
       </div>
     </>
   );

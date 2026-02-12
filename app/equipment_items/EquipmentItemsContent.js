@@ -468,24 +468,24 @@ export function EquipmentItemsContent({
           >
             Serial Number
           </label>
-          <input
-            type="text"
-            id="serial-number"
-            value={serialNumber}
-            onChange={(e) => setSerialNumber(e.target.value)}
-            className={inputClass}
-            placeholder=""
-          />
-        </div>
-        <div className="flex items-end gap-1">
-          <button
-            type="button"
-            onClick={handleSearchClick}
-            disabled={serialNumber.trim().length < 2}
-            className="rounded border border-zinc-300 bg-white px-2 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-          >
-            Search &gt;&gt;
-          </button>
+          <div className="flex items-stretch gap-0">
+            <input
+              type="text"
+              id="serial-number"
+              value={serialNumber}
+              onChange={(e) => setSerialNumber(e.target.value)}
+              className={inputClass + " rounded-r-none"}
+              placeholder=""
+            />
+            <button
+              type="button"
+              onClick={handleSearchClick}
+              disabled={serialNumber.trim().length < 2}
+              className="rounded-r border border-l-0 border-zinc-300 bg-white px-2 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            >
+              Search &gt;&gt;
+            </button>
+          </div>
         </div>
         <div>
           <label
@@ -528,6 +528,9 @@ export function EquipmentItemsContent({
             aria-label="id"
           />
         </div>
+      </div>
+      <hr className="my-4 border-zinc-200 dark:border-zinc-700" />
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={handleSave}

@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Hello World",
-  description: "A simple Hello World app",
+  title: "Mining Tools",
+  description: "Mining Tools app",
 };
 
 export default function RootLayout({ children }) {
