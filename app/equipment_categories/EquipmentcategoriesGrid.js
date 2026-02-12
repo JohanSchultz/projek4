@@ -9,9 +9,7 @@ const invisibleColClass =
   "w-0 max-w-0 p-0 overflow-hidden invisible border-0";
 
 const columnHeaders = {
-  equipmenttype: "Equipment Type",
-  equipmentcategories_id: "Category",
-  equipmentcategory: "Category",
+  descr: "Description",
   isactive: "Active",
 };
 
@@ -39,7 +37,7 @@ function formatValue(value) {
   return String(value);
 }
 
-export function AllequipmenttypesGrid({ data, onRowClick }) {
+export function EquipmentcategoriesGrid({ data, onRowClick }) {
   const rows = Array.isArray(data) ? data : [];
   const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
 
@@ -52,7 +50,7 @@ export function AllequipmenttypesGrid({ data, onRowClick }) {
               <th
                 key={key}
                 className={
-                  key === "id" || key === "equipmentcategories_id"
+                  key === "id" || key === "created_at" || key === "matgroupid"
                     ? `${thClass} ${invisibleColClass}`
                     : thClass
                 }
@@ -81,7 +79,7 @@ export function AllequipmenttypesGrid({ data, onRowClick }) {
                 <td
                   key={key}
                   className={
-                    key === "id" || key === "equipmentcategories_id"
+                    key === "id" || key === "created_at" || key === "matgroupid"
                       ? `${tdClass} ${invisibleColClass}`
                       : tdClass
                   }

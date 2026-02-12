@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { EquipmentTypesContent } from "./EquipmentTypesContent";
+import { EquipmentCategoriesContent } from "./EquipmentCategoriesContent";
 
 async function signOut() {
   "use server";
@@ -10,43 +10,24 @@ async function signOut() {
   redirect("/login");
 }
 
-async function getEquipmentCategories() {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("equipmentcategories")
-      .select("id, descr")
-      .eq("isactive", true)
-      .order("descr", { ascending: true });
-    if (error) throw error;
-    return { data: data ?? [], error: null };
-  } catch (err) {
-    return { data: null, error: err?.message ?? String(err) };
-  }
-}
-
-async function insertEquipmentType(equipmentcategories_id, descr, isactive) {
+async function insertEquipmentCategory(descr, isactive) {
   "use server";
   try {
-    if (equipmentcategories_id == null || Number(equipmentcategories_id) === 0) {
-      return { error: "Please select an equipment category." };
-    }
     const trimmedDescr = typeof descr === "string" ? descr.trim() : "";
     if (!trimmedDescr) {
-      return { error: "Equipment type is required." };
+      return { error: "Equipment category is required." };
     }
     const supabase = await createClient();
     const { data: existing } = await supabase
-      .from("equipmenttypes")
+      .from("equipmentcategories")
       .select("id")
       .eq("descr", trimmedDescr)
       .limit(1)
       .maybeSingle();
     if (existing) {
-      return { error: "An equipment type with this description already exists." };
+      return { error: "An equipment category with this description already exists." };
     }
-    const { error } = await supabase.from("equipmenttypes").insert({
-      equipmentcategories_id: Number(equipmentcategories_id),
+    const { error } = await supabase.from("equipmentcategories").insert({
       descr: trimmedDescr,
       isactive: Boolean(isactive),
     });
@@ -57,22 +38,15 @@ async function insertEquipmentType(equipmentcategories_id, descr, isactive) {
   }
 }
 
-async function updateEquipmentType(
-  id,
-  equipmentcategories_id,
-  descr,
-  isactive
-) {
+async function updateEquipmentCategory(id, descr, isactive) {
   "use server";
   try {
     const supabase = await createClient();
     const updates = {};
-    if (equipmentcategories_id != null)
-      updates.equipmentcategories_id = Number(equipmentcategories_id);
     if (typeof descr === "string") updates.descr = descr.trim() || null;
     if (typeof isactive === "boolean") updates.isactive = isactive;
     const { error } = await supabase
-      .from("equipmenttypes")
+      .from("equipmentcategories")
       .update(updates)
       .eq("id", Number(id));
     if (error) throw error;
@@ -82,11 +56,14 @@ async function updateEquipmentType(
   }
 }
 
-async function fetchAllequipmenttypes() {
+async function fetchAllEquipmentCategories() {
   "use server";
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.rpc("get_allequipmenttypes");
+    const { data, error } = await supabase
+      .from("equipmentcategories")
+      .select("*")
+      .order("id", { ascending: true });
     if (error) throw error;
     return { data: Array.isArray(data) ? data : [], error: null };
   } catch (err) {
@@ -94,11 +71,7 @@ async function fetchAllequipmenttypes() {
   }
 }
 
-export default async function EquipmentTypesPage() {
-  const { data: categories, error: categoriesError } =
-    await getEquipmentCategories();
-  const categoryList = categories ?? [];
-
+export default async function EquipmentCategoriesPage() {
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 font-sans dark:bg-zinc-950">
       <header className="flex shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900">
@@ -109,7 +82,7 @@ export default async function EquipmentTypesPage() {
           ← Menu
         </Link>
         <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Equipment types
+          Equipment Categories
         </h1>
         <form action={signOut}>
           <button
@@ -121,16 +94,10 @@ export default async function EquipmentTypesPage() {
         </form>
       </header>
       <main className="flex-1 overflow-auto p-6">
-        {categoriesError && (
-          <p className="mb-4 text-sm text-amber-600 dark:text-amber-400">
-            {categoriesError}
-          </p>
-        )}
-        <EquipmentTypesContent
-          categories={categoryList}
-          insertEquipmentType={insertEquipmentType}
-          updateEquipmentType={updateEquipmentType}
-          fetchAllequipmenttypes={fetchAllequipmenttypes}
+        <EquipmentCategoriesContent
+          insertEquipmentCategory={insertEquipmentCategory}
+          updateEquipmentCategory={updateEquipmentCategory}
+          fetchAllEquipmentCategories={fetchAllEquipmentCategories}
         />
       </main>
     </div>

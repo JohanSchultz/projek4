@@ -1,34 +1,28 @@
 "use client";
 
-import { useState, useTransition, useEffect, useRef } from "react";
-import { AllequipmenttypesGrid } from "./AllequipmenttypesGrid";
+import { useState, useTransition, useEffect } from "react";
+import { EquipmentcategoriesGrid } from "./EquipmentcategoriesGrid";
 
 const inputClass =
-  "rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:focus:border-zinc-400 dark:focus:ring-zinc-400";
-const selectClass =
   "rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:focus:border-zinc-400 dark:focus:ring-zinc-400";
 const checkboxClass =
   "h-4 w-4 rounded border-zinc-300 text-zinc-600 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:focus:ring-zinc-400";
 
-export function EquipmentTypesContent({
-  categories,
-  insertEquipmentType,
-  updateEquipmentType,
-  fetchAllequipmenttypes,
+export function EquipmentCategoriesContent({
+  insertEquipmentCategory,
+  updateEquipmentCategory,
+  fetchAllEquipmentCategories,
 }) {
-  const categoryList = categories ?? [];
-  const [categoryId, setCategoryId] = useState(0);
   const [descr, setDescr] = useState("");
   const [isactive, setIsactive] = useState(true);
   const [selectedRowId, setSelectedRowId] = useState(null);
   const [gridData, setGridData] = useState([]);
   const [saveError, setSaveError] = useState(null);
   const [isPending, startTransition] = useTransition();
-  const categorySelectRef = useRef(null);
 
   const loadGrid = () => {
-    if (typeof fetchAllequipmenttypes !== "function") return;
-    fetchAllequipmenttypes().then((res) => {
+    if (typeof fetchAllEquipmentCategories !== "function") return;
+    fetchAllEquipmentCategories().then((res) => {
       setGridData(Array.isArray(res?.data) ? res.data : []);
     });
   };
@@ -37,36 +31,21 @@ export function EquipmentTypesContent({
     loadGrid();
   }, []);
 
-  useEffect(() => {
-    if (selectedRowId == null || categorySelectRef.current == null) return;
-    const sel = categorySelectRef.current;
-    const option = sel.options[sel.selectedIndex];
-    if (option) option.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [selectedRowId, categoryId]);
-
   const handleSave = () => {
     setSaveError(null);
-    const equipmentcategories_id = categoryId === 0 ? null : categoryId;
-    if (equipmentcategories_id == null) {
-      setSaveError("Please select an equipment category.");
-      return;
-    }
     const trimmedDescr = descr.trim();
     if (!trimmedDescr) {
-      setSaveError("Equipment type is required.");
+      setSaveError("Equipment category is required.");
       return;
     }
     startTransition(async () => {
-      const result = await insertEquipmentType(
-        equipmentcategories_id,
-        trimmedDescr,
-        isactive
-      );
+      const result = await insertEquipmentCategory(trimmedDescr, isactive);
       if (result?.error) {
         setSaveError(result.error);
         return;
       }
       setDescr("");
+      setIsactive(true);
       loadGrid();
     });
   };
@@ -74,15 +53,13 @@ export function EquipmentTypesContent({
   const handleRowClick = (row) => {
     setSaveError(null);
     setSelectedRowId(row.id ?? null);
-    setCategoryId(row.equipmentcategories_id ?? 0);
-    setDescr(row.equipmenttype ?? "");
+    setDescr(row.descr ?? "");
     setIsactive(row.isactive ?? false);
   };
 
   const handleNew = () => {
     setSaveError(null);
     setSelectedRowId(null);
-    setCategoryId(0);
     setDescr("");
     setIsactive(true);
   };
@@ -90,20 +67,14 @@ export function EquipmentTypesContent({
   const handleChange = () => {
     if (selectedRowId == null) return;
     setSaveError(null);
-    const equipmentcategories_id = categoryId === 0 ? null : categoryId;
-    if (equipmentcategories_id == null) {
-      setSaveError("Please select an equipment category.");
-      return;
-    }
     const trimmedDescr = descr.trim();
     if (!trimmedDescr) {
-      setSaveError("Equipment type is required.");
+      setSaveError("Equipment category is required.");
       return;
     }
     startTransition(async () => {
-      const result = await updateEquipmentType(
+      const result = await updateEquipmentCategory(
         selectedRowId,
-        equipmentcategories_id,
         trimmedDescr,
         isactive
       );
@@ -120,9 +91,8 @@ export function EquipmentTypesContent({
     if (selectedRowId == null) return;
     setSaveError(null);
     startTransition(async () => {
-      const result = await updateEquipmentType(
+      const result = await updateEquipmentCategory(
         selectedRowId,
-        null,
         null,
         false
       );
@@ -140,38 +110,14 @@ export function EquipmentTypesContent({
       <div className="mb-6 flex flex-wrap items-end gap-6">
         <div>
           <label
-            htmlFor="equipment-category"
+            htmlFor="equipment-categories-descr"
             className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
-            Equipment categories
-          </label>
-          <select
-            ref={categorySelectRef}
-            id="equipment-category"
-            value={categoryId == null ? "" : categoryId}
-            onChange={(e) =>
-              setCategoryId(e.target.value === "" ? 0 : Number(e.target.value))
-            }
-            className={selectClass}
-          >
-            <option value={0}>   -  SELECT  - </option>
-            {categoryList.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.descr ?? c.id}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label
-            htmlFor="equipment-type-descr"
-            className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-          >
-            Equipment type
+            Equipment category
           </label>
           <input
             type="text"
-            id="equipment-type-descr"
+            id="equipment-categories-descr"
             value={descr}
             onChange={(e) => setDescr(e.target.value)}
             className={inputClass}
@@ -181,27 +127,17 @@ export function EquipmentTypesContent({
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
-            id="equipment-type-active"
+            id="equipment-category-active"
             checked={isactive}
             onChange={(e) => setIsactive(e.target.checked)}
             className={checkboxClass}
           />
           <label
-            htmlFor="equipment-type-active"
+            htmlFor="equipment-category-active"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Active
           </label>
-        </div>
-        <div className="hidden">
-          <input
-            type="text"
-            readOnly
-            value={selectedRowId != null ? String(selectedRowId) : ""}
-            className="w-20 rounded border border-zinc-300 bg-zinc-50 px-2 py-2 text-sm text-zinc-800 dark:border-zinc-600 dark:bg-zinc-800/50 dark:text-zinc-200"
-            placeholder="—"
-            aria-label="Selected ID"
-          />
         </div>
         <button
           type="button"
@@ -257,7 +193,7 @@ export function EquipmentTypesContent({
         </p>
       )}
       <div>
-        <AllequipmenttypesGrid data={gridData} onRowClick={handleRowClick} />
+        <EquipmentcategoriesGrid data={gridData} onRowClick={handleRowClick} />
       </div>
     </>
   );
