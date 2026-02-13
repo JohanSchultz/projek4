@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { DateRangeEquipmentTypeFilter } from "@/components/DateRangeEquipmentTypeFilter";
 import {
-  exportToExcelWithTitle,
+  exportServiceListToExcelWithImage,
   exportToPdfTable,
   getServiceListColumnConfig,
 } from "@/lib/export-utils";
@@ -87,8 +87,8 @@ export function ReportServiceListContent({
           <div className="mb-2 flex justify-between">
             <button
               type="button"
-              onClick={() =>
-                exportToExcelWithTitle(
+              onClick={async () => {
+                await exportServiceListToExcelWithImage(
                   gridData,
                   "Service List",
                   "servicelist.xlsx",
@@ -98,8 +98,8 @@ export function ReportServiceListContent({
                   reportToDate,
                   reportFilterLabels ?? undefined,
                   reportEquipmentTypeLabels
-                )
-              }
+                );
+              }}
               className="rounded border border-green-300 bg-green-100 px-4 py-2 text-sm font-medium text-green-800 shadow-sm hover:bg-green-200 dark:border-green-600 dark:bg-green-900/30 dark:text-green-200 dark:hover:bg-green-800/40"
             >
               Export to Excel
