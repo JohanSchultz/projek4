@@ -47,9 +47,22 @@ function formatValue(value) {
   return String(value);
 }
 
+const displayOrder = [
+  "id", "mine_id", "shaft_id", "section_id",
+  "descr", "gang",
+  "section", "section_descr",
+  "shaft", "shaft_descr", "mine", "mine_descr",
+  "isactive",
+];
+
+function orderColumns(keys) {
+  const order = new Map(displayOrder.map((k, i) => [k, i]));
+  return [...keys].sort((a, b) => (order.get(a) ?? 999) - (order.get(b) ?? 999));
+}
+
 export function AllgangsGrid({ data, onRowClick }) {
   const rows = Array.isArray(data) ? data : [];
-  const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+  const columns = rows.length > 0 ? orderColumns(Object.keys(rows[0])) : [];
 
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">

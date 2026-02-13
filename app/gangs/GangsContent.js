@@ -35,6 +35,7 @@ export function GangsContent({
   const mineSelectRef = useRef(null);
   const shaftSelectRef = useRef(null);
   const sectionSelectRef = useRef(null);
+  const nextSectionIdRef = useRef(null);
 
   const loadGrid = () => {
     if (typeof fetchAllGangs !== "function") return;
@@ -87,6 +88,11 @@ export function GangsContent({
     if (pendingShaftId != null && shaftsList.some((s) => s.id === pendingShaftId)) {
       setShaftId(pendingShaftId);
       setPendingShaftId(null);
+      const nextSection = nextSectionIdRef.current;
+      nextSectionIdRef.current = null;
+      if (nextSection != null && nextSection !== 0) {
+        setPendingSectionId(nextSection);
+      }
     }
   }, [shaftsList, pendingShaftId]);
 
@@ -146,7 +152,8 @@ export function GangsContent({
     setSelectedRowId(row.id ?? null);
     setMineId(row.mine_id ?? 0);
     setPendingShaftId(row.shaft_id ?? 0);
-    setPendingSectionId(row.section_id ?? 0);
+    nextSectionIdRef.current = row.section_id ?? 0;
+    setPendingSectionId(null);
     setDescr(row.descr ?? row.gang ?? "");
     setIsactive(row.isactive ?? false);
   };
@@ -159,6 +166,7 @@ export function GangsContent({
     setSectionId(0);
     setPendingShaftId(null);
     setPendingSectionId(null);
+    nextSectionIdRef.current = null;
     setDescr("");
     setIsactive(true);
   };

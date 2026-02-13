@@ -102,6 +102,22 @@ async function updateGang(id, section_id, descr, isactive) {
   "use server";
   try {
     const supabase = await createClient();
+    if (typeof descr === "string" && descr.trim()) {
+      const trimmedDescr = descr.trim();
+      const sid = section_id != null ? Number(section_id) : null;
+      let query = supabase
+        .from("gangs")
+        .select("id")
+        .eq("descr", trimmedDescr)
+        .neq("id", Number(id));
+      if (sid != null) query = query.eq("section_id", sid);
+      const { data: existing } = await query.limit(1).maybeSingle();
+      if (existing) {
+        return {
+          error: "A gang with this description already exists for this section.",
+        };
+      }
+    }
     const updates = {};
     if (section_id != null) updates.section_id = Number(section_id);
     if (typeof descr === "string") updates.descr = descr.trim() || null;
