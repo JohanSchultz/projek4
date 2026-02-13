@@ -26,18 +26,27 @@ function formatValue(value) {
   return String(value);
 }
 
-export function ServiceListGrid({ data }) {
+export function ServiceListGrid({ data, columnConfig }) {
   const rows = Array.isArray(data) ? data : [];
-  const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+  const orderedKeys =
+    columnConfig?.orderedKeys?.length > 0 && rows.length > 0
+      ? columnConfig.orderedKeys
+      : rows.length > 0
+        ? Object.keys(rows[0])
+        : [];
+  const headerLabels =
+    columnConfig?.headerLabels?.length === orderedKeys.length
+      ? columnConfig.headerLabels
+      : orderedKeys;
 
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
       <table className="w-full min-w-[32rem] text-left text-sm">
         <thead>
           <tr>
-            {columns.map((key) => (
-              <th key={key} className={thClass}>
-                {key}
+            {headerLabels.map((label, i) => (
+              <th key={orderedKeys[i] ?? i} className={thClass}>
+                {label}
               </th>
             ))}
           </tr>
@@ -45,7 +54,7 @@ export function ServiceListGrid({ data }) {
         <tbody>
           {rows.map((row, index) => (
             <tr key={row.id ?? index} className={rowClass}>
-              {columns.map((key) => (
+              {orderedKeys.map((key) => (
                 <td key={key} className={tdClass}>
                   {key === "isactive" ? (
                     <span

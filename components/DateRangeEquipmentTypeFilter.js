@@ -381,6 +381,26 @@ export function DateRangeEquipmentTypeFilter({
                 selectedMineId,
                 selectedShaftId,
                 selectedSectionId,
+                selectedGangId,
+                equipmentTypeLabels: Array.from(selectedIds)
+                  .map((id) => types.find((t) => t.id === id)?.descr ?? String(id))
+                  .filter(Boolean),
+                mineLabel:
+                  selectedMineId === 0
+                    ? "ALL"
+                    : minesList.find((m) => m.id === selectedMineId)?.descr ?? "",
+                shaftLabel:
+                  selectedShaftId === 0
+                    ? "ALL"
+                    : shaftsList.find((s) => s.id === selectedShaftId)?.descr ?? "",
+                sectionLabel:
+                  selectedSectionId === 0
+                    ? "ALL"
+                    : sectionsList.find((sec) => sec.id === selectedSectionId)?.descr ?? "",
+                gangLabel:
+                  selectedGangId === 0
+                    ? "ALL"
+                    : gangsList.find((g) => g.id === selectedGangId)?.descr ?? "",
               })
             }
             className="rounded border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
