@@ -89,7 +89,16 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
   const serialKey = findSerialNoKey(orderedKeys);
   const jobNoKey = findJobNoKey(orderedKeys);
   if (!mineKey || rows.length === 0) {
-    return rows.map((r, i) => ({ ...r, __index: i, __showMine: true, __showShaft: true, __showSection: true, __showType: true, __showSerial: true, __showJobNoInSerial: true }));
+    return rows.map((r, i) => ({ ...r, __index: i, __showMine: true, __showShaft: true, __showSection: true, __showType: true, __showSerial: true, __showJobNoInSerial: true, __groupKeys: [] }));
+  }
+  const LEVEL_NAMES = ["mine", "shaft", "section", "type", "serial", "job"];
+  const LEVEL_DEPTH = { mine: 1, shaft: 2, section: 3, type: 4, serial: 5, job_in_serial: 6 };
+  function buildGroupKey(levelIndex, path) {
+    const parts = LEVEL_NAMES.slice(0, levelIndex + 1).map((n) => path[n] ?? "__null");
+    return `${LEVEL_NAMES[levelIndex]}:${parts.join(":")}`;
+  }
+  function buildGroupKeys(path, depth) {
+    return Array.from({ length: depth }, (_, i) => buildGroupKey(i, path));
   }
   const byMine = new Map();
   for (let i = 0; i < rows.length; i++) {
@@ -104,9 +113,11 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
   for (const mineKeyVal of mineKeysSorted) {
     const mineRows = byMine.get(mineKeyVal);
     if (!shaftKey) {
+      const path = { mine: mineKeyVal, shaft: null, section: null, type: null, serial: null, job: null };
+      const depth = 1;
       let firstMine = true;
       for (const row of mineRows) {
-        result.push({ ...row, __showMine: firstMine, __showShaft: true, __showSection: true, __showType: true, __showSerial: true });
+        result.push({ ...row, __showMine: firstMine, __showShaft: true, __showSection: true, __showType: true, __showSerial: true, __path: path, __groupKeys: buildGroupKeys(path, depth) });
         firstMine = false;
       }
       result.push({
@@ -125,6 +136,8 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
         typeKey: null,
         serialKey: null,
         totalKey,
+        __path: path,
+        __groupKeys: buildGroupKeys(path, depth),
       });
       continue;
     }
@@ -139,10 +152,12 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
     for (const shaftKeyVal of shaftKeysSorted) {
       const shaftRows = byShaft.get(shaftKeyVal);
       if (!sectionKey) {
+        const path = { mine: mineKeyVal, shaft: shaftKeyVal, section: null, type: null, serial: null, job: null };
+        const depth = 2;
         let firstMine = true;
         let firstShaft = true;
         for (const row of shaftRows) {
-          result.push({ ...row, __showMine: firstMine, __showShaft: firstShaft, __showSection: true, __showType: true, __showSerial: true });
+          result.push({ ...row, __showMine: firstMine, __showShaft: firstShaft, __showSection: true, __showType: true, __showSerial: true, __path: path, __groupKeys: buildGroupKeys(path, depth) });
           firstShaft = false;
           firstMine = false;
         }
@@ -162,6 +177,8 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
           typeKey: null,
           serialKey: null,
           totalKey,
+          __path: path,
+          __groupKeys: buildGroupKeys(path, depth),
         });
         continue;
       }
@@ -178,9 +195,11 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
       for (const sectionKeyVal of sectionKeysSorted) {
         const sectionRows = bySection.get(sectionKeyVal);
         if (!typeKey) {
+          const path = { mine: mineKeyVal, shaft: shaftKeyVal, section: sectionKeyVal, type: null, serial: null, job: null };
+          const depth = 3;
           let firstSection = true;
           for (const row of sectionRows) {
-            result.push({ ...row, __showMine: firstMine, __showShaft: firstShaft, __showSection: firstSection, __showType: true, __showSerial: true });
+            result.push({ ...row, __showMine: firstMine, __showShaft: firstShaft, __showSection: firstSection, __showType: true, __showSerial: true, __path: path, __groupKeys: buildGroupKeys(path, depth) });
             firstSection = false;
             firstShaft = false;
             firstMine = false;
@@ -201,6 +220,8 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
             typeKey: null,
             serialKey: null,
             totalKey,
+            __path: path,
+            __groupKeys: buildGroupKeys(path, depth),
           });
           continue;
         }
@@ -215,10 +236,12 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
         for (const typeKeyVal of typeKeysSorted) {
           const typeRows = byType.get(typeKeyVal);
           if (!serialKey) {
+            const path = { mine: mineKeyVal, shaft: shaftKeyVal, section: sectionKeyVal, type: typeKeyVal, serial: null, job: null };
+            const depth = 4;
             let firstSection = true;
             let firstType = true;
             for (const row of typeRows) {
-              result.push({ ...row, __showMine: firstMine, __showShaft: firstShaft, __showSection: firstSection, __showType: firstType, __showSerial: true });
+              result.push({ ...row, __showMine: firstMine, __showShaft: firstShaft, __showSection: firstSection, __showType: firstType, __showSerial: true, __path: path, __groupKeys: buildGroupKeys(path, depth) });
               firstType = false;
               firstSection = false;
               firstShaft = false;
@@ -240,6 +263,8 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
               typeKey,
               serialKey: null,
               totalKey,
+              __path: path,
+              __groupKeys: buildGroupKeys(path, depth),
             });
             continue;
           }
@@ -254,11 +279,13 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
           for (const serialKeyVal of serialKeysSorted) {
             const serialRows = bySerial.get(serialKeyVal);
             if (!jobNoKey) {
+              const path = { mine: mineKeyVal, shaft: shaftKeyVal, section: sectionKeyVal, type: typeKeyVal, serial: serialKeyVal, job: null };
+              const depth = 5;
               let firstSection = true;
               let firstType = true;
               let firstSerial = true;
               for (const row of serialRows) {
-                result.push({ ...row, __showMine: firstMine, __showShaft: firstShaft, __showSection: firstSection, __showType: firstType, __showSerial: firstSerial });
+                result.push({ ...row, __showMine: firstMine, __showShaft: firstShaft, __showSection: firstSection, __showType: firstType, __showSerial: firstSerial, __path: path, __groupKeys: buildGroupKeys(path, depth) });
                 firstSerial = false;
                 firstType = false;
                 firstSection = false;
@@ -283,6 +310,8 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
                 serialKey,
                 jobNoKey: null,
                 totalKey,
+                __path: path,
+                __groupKeys: buildGroupKeys(path, depth),
               });
               continue;
             }
@@ -294,6 +323,7 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
               byJobNoInSerial.get(k).push(row);
             }
             const jobNoInSerialKeysSorted = Array.from(byJobNoInSerial.keys()).sort(sortGroupKeys);
+            const pathSerial = { mine: mineKeyVal, shaft: shaftKeyVal, section: sectionKeyVal, type: typeKeyVal, serial: serialKeyVal, job: null };
             for (const jobNoKeyVal of jobNoInSerialKeysSorted) {
               const jobNoRows = byJobNoInSerial.get(jobNoKeyVal);
               let firstSection = true;
@@ -301,7 +331,9 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
               let firstSerial = true;
               let firstJobNoInSerial = true;
               for (const row of jobNoRows) {
-                result.push({ ...row, __showMine: firstMine, __showShaft: firstShaft, __showSection: firstSection, __showType: firstType, __showSerial: firstSerial, __showJobNoInSerial: firstJobNoInSerial });
+                const pathJob = { ...pathSerial, job: row[jobNoKey] != null ? row[jobNoKey] : "__null" };
+                const depthJob = 6;
+                result.push({ ...row, __showMine: firstMine, __showShaft: firstShaft, __showSection: firstSection, __showType: firstType, __showSerial: firstSerial, __showJobNoInSerial: firstJobNoInSerial, __path: pathJob, __groupKeys: buildGroupKeys(pathJob, depthJob) });
                 firstJobNoInSerial = false;
                 firstSerial = false;
                 firstType = false;
@@ -309,6 +341,8 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
                 firstShaft = false;
                 firstMine = false;
               }
+              const pathJob = { ...pathSerial, job: jobNoKeyVal };
+              const depthJob = 6;
               result.push({
                 __subtotal: true,
                 level: "job_in_serial",
@@ -327,8 +361,11 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
                 serialKey,
                 jobNoKey,
                 totalKey,
+                __path: pathJob,
+                __groupKeys: buildGroupKeys(pathJob, depthJob),
               });
             }
+            const depthSerial = 5;
             result.push({
               __subtotal: true,
               level: "serial",
@@ -347,8 +384,12 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
               serialKey,
               jobNoKey: null,
               totalKey,
+              __path: pathSerial,
+              __groupKeys: buildGroupKeys(pathSerial, depthSerial),
             });
           }
+          const pathType = { mine: mineKeyVal, shaft: shaftKeyVal, section: sectionKeyVal, type: typeKeyVal, serial: null, job: null };
+          const depthType = 4;
           result.push({
             __subtotal: true,
             level: "type",
@@ -365,8 +406,12 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
             typeKey,
             serialKey: null,
             totalKey,
+            __path: pathType,
+            __groupKeys: buildGroupKeys(pathType, depthType),
           });
         }
+        const pathSection = { mine: mineKeyVal, shaft: shaftKeyVal, section: sectionKeyVal, type: null, serial: null, job: null };
+        const depthSection = 3;
         result.push({
           __subtotal: true,
           level: "section",
@@ -383,8 +428,12 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
           typeKey: null,
           serialKey: null,
           totalKey,
+          __path: pathSection,
+          __groupKeys: buildGroupKeys(pathSection, depthSection),
         });
       }
+      const pathShaft = { mine: mineKeyVal, shaft: shaftKeyVal, section: null, type: null, serial: null, job: null };
+      const depthShaft = 2;
       result.push({
         __subtotal: true,
         level: "shaft",
@@ -401,8 +450,12 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
         typeKey: null,
         serialKey: null,
         totalKey,
+        __path: pathShaft,
+        __groupKeys: buildGroupKeys(pathShaft, depthShaft),
       });
     }
+    const pathMine = { mine: mineKeyVal, shaft: null, section: null, type: null, serial: null, job: null };
+    const depthMine = 1;
     result.push({
       __subtotal: true,
       level: "mine",
@@ -419,6 +472,8 @@ function rowsWithMineShaftSectionGrouping(rows, orderedKeys) {
       typeKey: null,
       serialKey: null,
       totalKey,
+      __path: pathMine,
+      __groupKeys: buildGroupKeys(pathMine, depthMine),
     });
   }
   return result;
@@ -466,6 +521,16 @@ export function ServicesDoneContent({
   const [gridData, setGridData] = useState([]);
   const [reportError, setReportError] = useState(null);
   const [isPending, startTransition] = useTransition();
+  const [collapsedKeys, setCollapsedKeys] = useState(() => new Set());
+
+  const toggleCollapsed = (key) => {
+    setCollapsedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   const handleShowReport = (params) => {
     setReportError(null);
@@ -520,7 +585,12 @@ export function ServicesDoneContent({
         )}
         {!isPending && !reportError && gridData.length > 0 && (() => {
           const orderedKeys = Object.keys(gridData[0]);
-          const rowsToRender = rowsWithMineShaftSectionGrouping(gridData, orderedKeys);
+          const groupedRows = rowsWithMineShaftSectionGrouping(gridData, orderedKeys);
+          const rowsToRender = groupedRows.filter((row) => {
+            const keys = row.__groupKeys;
+            if (!keys || keys.length === 0) return true;
+            return keys.every((k, i) => (row.__subtotal && i === keys.length - 1) || !collapsedKeys.has(k));
+          });
           const mineKey = findMineKey(orderedKeys);
           const shaftKey = findShaftKey(orderedKeys);
           const sectionKey = findSectionKey(orderedKeys);
@@ -555,12 +625,24 @@ export function ServicesDoneContent({
                                 : item.level === "serial"
                                   ? `Serial No total (${item.count} ${item.count === 1 ? "row" : "rows"})`
                                   : `Job No total (${item.count} ${item.count === 1 ? "row" : "rows"})`;
+                      const groupKey = item.__groupKeys && item.__groupKeys.length > 0 ? item.__groupKeys[item.__groupKeys.length - 1] : null;
+                      const isCollapsed = groupKey != null && collapsedKeys.has(groupKey);
                       return (
                         <tr key={`subtotal-${item.level}-${item.mineValue ?? "n"}-${item.shaftValue ?? "n"}-${item.sectionValue ?? "n"}-${item.typeValue ?? "n"}-${item.serialValue ?? "n"}-${item.jobNoValue ?? "n"}-${index}`} className={gridSubtotalRowClass}>
                           {orderedKeys.map((key, i) => {
                             if (i === 0)
                               return (
                                 <td key={key} className={gridTdClass}>
+                                  {groupKey != null ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleCollapsed(groupKey)}
+                                      className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-zinc-300 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
+                                      aria-label={isCollapsed ? "Expand" : "Collapse"}
+                                    >
+                                      {isCollapsed ? "▶" : "▼"}
+                                    </button>
+                                  ) : null}
                                   {label}
                                 </td>
                               );
