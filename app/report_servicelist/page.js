@@ -129,6 +129,18 @@ async function fetchServiceListData(
   }
 }
 
+async function getMinsPerType() {
+  "use server";
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("get_minspertype");
+    if (error) throw error;
+    return { data: Array.isArray(data) ? data : [], error: null };
+  } catch (err) {
+    return { data: null, error: err?.message ?? String(err) };
+  }
+}
+
 export default async function ReportServiceListPage() {
   const { data: equipmentTypes, error: typesError } =
     await getEquipmentTypes();
@@ -175,6 +187,7 @@ export default async function ReportServiceListPage() {
           fetchSectionsByShaftId={fetchSectionsByShaftId}
           fetchGangsBySectionId={fetchGangsBySectionId}
           fetchServiceListData={fetchServiceListData}
+          getMinsPerType={getMinsPerType}
         />
       </main>
     </div>

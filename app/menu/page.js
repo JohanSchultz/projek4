@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MenuTree } from "./MenuTree";
+import { MenuIdsPopup } from "./MenuIdsPopup";
 
 async function signOut() {
   "use server";
@@ -11,7 +12,27 @@ async function signOut() {
   redirect("/login");
 }
 
-export default function MenuPage() {
+async function getMenuData() {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.id) return { userId: null, data: [], error: null };
+    const { data: ufRows, error } = await supabase
+      .from("userfunctions")
+      .select("function_id")
+      .eq("user_id", user.id);
+    if (error) throw error;
+    const rows = (ufRows ?? []).map((r) => ({ function_id: r.function_id }));
+    return { userId: user.id, data: rows, error: null };
+  } catch (err) {
+    return { userId: null, data: [], error: err?.message ?? String(err) };
+  }
+}
+
+export default async function MenuPage() {
+  const { userId, data: userFunctions } = await getMenuData();
+  const gridRows = userFunctions ?? [];
+
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 font-sans dark:bg-zinc-950">
       <header className="relative flex shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900">
@@ -39,8 +60,8 @@ export default function MenuPage() {
         </div>
         <MenuTree />
       </aside>
-      <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-8">
-        <div className="relative h-full w-full">
+      <main className="relative flex min-h-0 flex-1 flex-col items-center overflow-auto px-8 py-4">
+        <div className="relative h-[60vh] min-h-[200px] w-full max-w-4xl">
           <Image
             src="/MT%20Menu.png"
             alt="MT Menu"
@@ -50,6 +71,39 @@ export default function MenuPage() {
             priority
           />
         </div>
+        {userId != null && (
+          <p className="mt-2 text-center text-sm text-zinc-600 dark:text-zinc-400">
+            User ID: {String(userId)}
+          </p>
+        )}
+        {gridRows.length > 0 && (
+          <div className="mt-4 w-full max-w-2xl overflow-auto rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
+                  <th className="px-4 py-2 font-semibold text-zinc-700 dark:text-zinc-300">
+                    function_id
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {gridRows.map((row, index) => (
+                  <tr
+                    key={row.function_id ?? index}
+                    className="border-b border-zinc-200 dark:border-zinc-700"
+                  >
+                    <td className="px-4 py-2 text-zinc-800 dark:text-zinc-200">
+                      {row.function_id != null ? String(row.function_id) : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {gridRows.length > 0 && (
+          <MenuIdsPopup gridRows={gridRows} />
+        )}
       </main>
       </div>
     </div>

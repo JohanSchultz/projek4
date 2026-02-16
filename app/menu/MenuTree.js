@@ -39,13 +39,18 @@ export function MenuTree() {
             <span className="inline-block w-4 text-center text-sm" aria-hidden>
               {expanded.admin ? "▼" : "▶"}
             </span>
-            Admin
+            Administration
           </span>
           {expanded.admin && (
             <ul
               className={`mt-0.5 ml-2 pl-3 space-y-0.5 ${treeLineClass}`}
               role="group"
             >
+              <li role="treeitem">
+                <Link href="/permissions" className={childLinkClass}>
+                  Permissions
+                </Link>
+              </li>
               <li role="treeitem">
                 <Link href="/equipment_categories" className={childLinkClass}>
                   Equipment Categories
@@ -149,8 +154,8 @@ export function MenuTree() {
               role="group"
             >
               <li role="treeitem">
-                <Link href="/rpt_fullservicehistory" className={childLinkClass}>
-                  Full Service History
+                <Link href="/rpt_servicesdone" className={childLinkClass}>
+                  Services done
                 </Link>
               </li>
               <li role="treeitem">

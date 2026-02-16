@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { FullServiceHistoryContent } from "./FullServiceHistoryContent";
+import { ServicesDoneContent } from "./ServicesDoneContent";
 
 async function signOut() {
   "use server";
@@ -135,9 +135,8 @@ async function fetchJobsWithParts(
   }
 }
 
-export default async function RptFullServiceHistoryPage() {
-  const { data: equipmentTypes, error: typesError } =
-    await getEquipmentTypes();
+export default async function RptServicesDonePage() {
+  const { data: equipmentTypes, error: typesError } = await getEquipmentTypes();
   const { data: mines, error: minesError } = await getMines();
   const types = equipmentTypes ?? [];
   const minesList = mines ?? [];
@@ -152,7 +151,7 @@ export default async function RptFullServiceHistoryPage() {
           ← Menu
         </Link>
         <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Full Service History
+          Services done
         </h1>
         <form action={signOut}>
           <button
@@ -174,7 +173,7 @@ export default async function RptFullServiceHistoryPage() {
             {minesError}
           </p>
         )}
-        <FullServiceHistoryContent
+        <ServicesDoneContent
           equipmentTypes={types}
           mines={minesList}
           fetchShaftsByMineId={fetchShaftsByMineId}
