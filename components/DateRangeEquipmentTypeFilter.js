@@ -212,7 +212,20 @@ export function DateRangeEquipmentTypeFilter({
     [fromDate, toDate, selectedIds, selectedMineId, selectedShaftId, selectedSectionId, selectedGangId, notify]
   );
 
+  const handleSelectNone = useCallback(() => {
+    const next = new Set();
+    setSelectedIds(next);
+    notify(fromDate, toDate, next, selectedMineId, selectedShaftId, selectedSectionId, selectedGangId);
+  }, [fromDate, toDate, selectedMineId, selectedShaftId, selectedSectionId, selectedGangId, notify]);
+
   const types = Array.isArray(equipmentTypes) ? equipmentTypes : [];
+
+  const handleSelectAll = useCallback(() => {
+    const typeIds = types.map((t) => t.id);
+    const next = new Set(typeIds);
+    setSelectedIds(next);
+    notify(fromDate, toDate, next, selectedMineId, selectedShaftId, selectedSectionId, selectedGangId);
+  }, [fromDate, toDate, selectedMineId, selectedShaftId, selectedSectionId, selectedGangId, notify, types]);
   const minesList = Array.isArray(mines) ? mines : [];
 
   return (
@@ -368,6 +381,24 @@ export function DateRangeEquipmentTypeFilter({
             </ul>
           )}
         </div>
+        {types.length > 0 && (
+          <div className="mt-2 flex w-full min-w-[12rem] justify-between">
+            <button
+              type="button"
+              onClick={handleSelectNone}
+              className="rounded border border-zinc-300 bg-white px-2 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            >
+              Select None
+            </button>
+            <button
+              type="button"
+              onClick={handleSelectAll}
+              className="rounded border border-zinc-300 bg-white px-2 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            >
+              Select All
+            </button>
+          </div>
+        )}
       </div>
       {typeof onShowReport === "function" && (
         <div className="flex items-end">

@@ -117,6 +117,11 @@ export function MenuTree() {
                   Add Job
                 </Link>
               </li>
+              <li role="treeitem">
+                <Link href="/notes" className={childLinkClass}>
+                  Notes
+                </Link>
+              </li>
             </ul>
           )}
         </li>
@@ -143,6 +148,11 @@ export function MenuTree() {
               className={`mt-0.5 ml-2 pl-3 space-y-0.5 ${treeLineClass}`}
               role="group"
             >
+              <li role="treeitem">
+                <Link href="/rpt_fullservicehistory" className={childLinkClass}>
+                  Full Service History
+                </Link>
+              </li>
               <li role="treeitem">
                 <Link href="/rpt_service_history" className={childLinkClass}>
                   Equipment List
