@@ -3,7 +3,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MenuTree } from "./MenuTree";
-import { MenuIdsPopup } from "./MenuIdsPopup";
 
 async function signOut() {
   "use server";
@@ -17,21 +16,48 @@ async function getMenuData() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.id) return { userId: null, data: [], error: null };
-    const { data: ufRows, error } = await supabase
-      .from("userfunctions")
-      .select("function_id")
-      .eq("user_id", user.id);
+    const { data: rows, error } = await supabase.rpc("get_permissions_by_user", {
+      p_user_id: user.id,
+    });
     if (error) throw error;
-    const rows = (ufRows ?? []).map((r) => ({ function_id: r.function_id }));
-    return { userId: user.id, data: rows, error: null };
+    const gridRows = Array.isArray(rows) ? rows : [];
+    return { userId: user.id, data: gridRows, error: null };
   } catch (err) {
     return { userId: null, data: [], error: err?.message ?? String(err) };
   }
 }
 
+function hasFunctionId(gridRows, n) {
+  const idSet = new Set(
+    (gridRows ?? []).map((row) => {
+      const id = row.function_id ?? row.id;
+      if (id == null) return null;
+      const num = Number(id);
+      return Number.isNaN(num) ? id : num;
+    })
+  );
+  return idSet.has(n) || idSet.has(String(n));
+}
+
 export default async function MenuPage() {
   const { userId, data: userFunctions } = await getMenuData();
   const gridRows = userFunctions ?? [];
+
+  const menuVisibility = {
+    equipmentCategories: hasFunctionId(gridRows, 1),
+    equipmentTypes: hasFunctionId(gridRows, 2),
+    equipmentItems: hasFunctionId(gridRows, 3),
+    mines: hasFunctionId(gridRows, 4),
+    shafts: hasFunctionId(gridRows, 5),
+    sections: hasFunctionId(gridRows, 6),
+    gangs: hasFunctionId(gridRows, 7),
+    parts: hasFunctionId(gridRows, 8),
+    addJob: hasFunctionId(gridRows, 9),
+    notes: hasFunctionId(gridRows, 10),
+    equipmentList: hasFunctionId(gridRows, 11),
+    serviceList: hasFunctionId(gridRows, 12),
+    permissions: hasFunctionId(gridRows, 13),
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 font-sans dark:bg-zinc-950">
@@ -58,26 +84,33 @@ export default async function MenuPage() {
             Navigation
           </h2>
         </div>
-        <MenuTree />
+        <MenuTree menuVisibility={menuVisibility} />
       </aside>
       <main className="relative flex min-h-0 flex-1 flex-col items-center overflow-auto px-8 py-4">
-        <div className="relative h-[60vh] min-h-[200px] w-full max-w-4xl">
-          <Image
-            src="/MT%20Menu.png"
-            alt="MT Menu"
-            fill
-            className="object-contain"
-            sizes="100vw"
-            priority
-          />
+        <div className="w-full max-w-4xl">
+          <div className="relative h-[60vh] min-h-[200px] w-full">
+            <Image
+              src="/MT%20Menu.png"
+              alt="MT Menu"
+              fill
+              className="object-contain"
+              sizes="100vw"
+              priority
+            />
+          </div>
+          {userId != null && (
+            <input
+              type="text"
+              name="usr"
+              readOnly
+              value={userId}
+              className="hidden mt-2 block w-full max-w-xs border border-zinc-300 bg-zinc-50 px-3 py-1.5 text-sm text-zinc-800 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200"
+              aria-label="Logged on user"
+            />
+          )}
         </div>
-        {userId != null && (
-          <p className="mt-2 text-center text-sm text-zinc-600 dark:text-zinc-400">
-            User ID: {String(userId)}
-          </p>
-        )}
         {gridRows.length > 0 && (
-          <div className="mt-4 w-full max-w-2xl overflow-auto rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+          <div className="hidden mt-4 w-full max-w-2xl overflow-auto rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
@@ -100,9 +133,6 @@ export default async function MenuPage() {
               </tbody>
             </table>
           </div>
-        )}
-        {gridRows.length > 0 && (
-          <MenuIdsPopup gridRows={gridRows} />
         )}
       </main>
       </div>

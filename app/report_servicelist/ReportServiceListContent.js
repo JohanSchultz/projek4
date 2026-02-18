@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition } from "react";
 import { DateRangeEquipmentTypeFilter } from "@/components/DateRangeEquipmentTypeFilter";
 import {
   exportServiceListToExcelWithImage,
@@ -8,7 +8,6 @@ import {
   getServiceListColumnConfig,
 } from "@/lib/export-utils";
 import { ServiceListGrid } from "./ServiceListGrid";
-import { MinsPerTypeGrid } from "./MinsPerTypeGrid";
 
 export function ReportServiceListContent({
   equipmentTypes,
@@ -17,33 +16,14 @@ export function ReportServiceListContent({
   fetchSectionsByShaftId,
   fetchGangsBySectionId,
   fetchServiceListData,
-  getMinsPerType,
 }) {
   const [gridData, setGridData] = useState(null);
-  const [minsPerTypeData, setMinsPerTypeData] = useState(null);
-  const [minsPerTypeError, setMinsPerTypeError] = useState(null);
   const [reportFromDate, setReportFromDate] = useState(null);
   const [reportToDate, setReportToDate] = useState(null);
   const [reportFilterLabels, setReportFilterLabels] = useState(null);
   const [reportEquipmentTypeLabels, setReportEquipmentTypeLabels] = useState([]);
   const [reportError, setReportError] = useState(null);
   const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    if (typeof getMinsPerType !== "function") return;
-    let cancelled = false;
-    getMinsPerType().then((result) => {
-      if (cancelled) return;
-      if (result?.error) {
-        setMinsPerTypeError(result.error);
-        setMinsPerTypeData(null);
-      } else {
-        setMinsPerTypeError(null);
-        setMinsPerTypeData(Array.isArray(result?.data) ? result.data : []);
-      }
-    });
-    return () => { cancelled = true; };
-  }, [getMinsPerType]);
 
   const handleShowReport = (params) => {
     setReportError(null);
@@ -76,21 +56,6 @@ export function ReportServiceListContent({
 
   return (
     <>
-      <div className="mb-6">
-        <h2 className="mb-3 text-base font-semibold text-zinc-800 dark:text-zinc-200">
-          Minutes per type
-        </h2>
-        {minsPerTypeError && (
-          <p className="mb-2 text-sm text-amber-600 dark:text-amber-400">
-            {minsPerTypeError}
-          </p>
-        )}
-        {minsPerTypeData && (
-          <div className="mb-6">
-            <MinsPerTypeGrid data={minsPerTypeData} />
-          </div>
-        )}
-      </div>
       <div className="mb-6">
         <DateRangeEquipmentTypeFilter
           equipmentTypes={equipmentTypes}

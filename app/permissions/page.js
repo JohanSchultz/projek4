@@ -13,9 +13,12 @@ async function signOut() {
 async function getAllUsers() {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.rpc("get_allusers");
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, email")
+      .order("email", { ascending: true });
     if (error) throw error;
-    return { data: Array.isArray(data) ? data : [], error: null };
+    return { data: data ?? [], error: null };
   } catch (err) {
     return { data: null, error: err?.message ?? String(err) };
   }
@@ -42,12 +45,12 @@ async function getUserFunctions(userId) {
       return { data: [], error: null };
     }
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("userfunctions")
-      .select("function_id")
-      .eq("user_id", userId);
+    const { data, error } = await supabase.rpc("get_permissions_by_user", {
+      p_user_id: String(userId),
+    });
     if (error) throw error;
-    const ids = (data ?? []).map((row) => row.function_id);
+    const rows = Array.isArray(data) ? data : [];
+    const ids = rows.map((row) => row.id != null ? row.id : row.function_id).filter((id) => id != null);
     return { data: ids, error: null };
   } catch (err) {
     return { data: null, error: err?.message ?? String(err) };
@@ -74,6 +77,33 @@ async function setUserFunction(userId, functionId, add) {
         .eq("user_id", userId)
         .eq("function_id", functionId);
       if (error) throw error;
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: err?.message ?? String(err) };
+  }
+}
+
+async function saveUserPermissions(userId, functionIds) {
+  "use server";
+  try {
+    if (userId == null || userId === "") {
+      return { error: "Please select a user." };
+    }
+    const supabase = await createClient();
+    const { error: deleteError } = await supabase
+      .from("userfunctions")
+      .delete()
+      .eq("user_id", userId);
+    if (deleteError) throw deleteError;
+    const ids = Array.isArray(functionIds) ? functionIds : [];
+    if (ids.length > 0) {
+      const rows = ids.map((function_id) => ({
+        user_id: userId,
+        function_id: Number(function_id) || function_id,
+      }));
+      const { error: insertError } = await supabase.from("userfunctions").insert(rows);
+      if (insertError) throw insertError;
     }
     return { error: null };
   } catch (err) {
@@ -124,6 +154,7 @@ export default async function PermissionsPage() {
           functions={functions}
           getUserFunctions={getUserFunctions}
           setUserFunction={setUserFunction}
+          saveUserPermissions={saveUserPermissions}
         />
       </main>
     </div>

@@ -5,8 +5,6 @@ import { DateRangeEquipmentTypeFilter } from "@/components/DateRangeEquipmentTyp
 
 const gridRowClass =
   "border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/50";
-const gridSubtotalRowClass =
-  "border-b border-zinc-200 bg-zinc-200 font-medium dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-100";
 const gridThClass =
   "border-b border-zinc-200 bg-zinc-100 px-4 py-3 font-semibold text-left text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300";
 const gridTdClass = "px-4 py-3 text-xs text-zinc-800 dark:text-zinc-200";
@@ -521,16 +519,6 @@ export function ServicesDoneContent({
   const [gridData, setGridData] = useState([]);
   const [reportError, setReportError] = useState(null);
   const [isPending, startTransition] = useTransition();
-  const [collapsedKeys, setCollapsedKeys] = useState(() => new Set());
-
-  const toggleCollapsed = (key) => {
-    setCollapsedKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
 
   const handleShowReport = (params) => {
     setReportError(null);
@@ -586,11 +574,7 @@ export function ServicesDoneContent({
         {!isPending && !reportError && gridData.length > 0 && (() => {
           const orderedKeys = Object.keys(gridData[0]);
           const groupedRows = rowsWithMineShaftSectionGrouping(gridData, orderedKeys);
-          const rowsToRender = groupedRows.filter((row) => {
-            const keys = row.__groupKeys;
-            if (!keys || keys.length === 0) return true;
-            return keys.every((k, i) => (row.__subtotal && i === keys.length - 1) || !collapsedKeys.has(k));
-          });
+          const rowsToRender = groupedRows.filter((row) => !row.__subtotal);
           const mineKey = findMineKey(orderedKeys);
           const shaftKey = findShaftKey(orderedKeys);
           const sectionKey = findSectionKey(orderedKeys);
@@ -611,89 +595,7 @@ export function ServicesDoneContent({
                   </tr>
                 </thead>
                 <tbody>
-                  {rowsToRender.map((item, index) => {
-                    if (item.__subtotal) {
-                      const label =
-                        item.level === "mine"
-                          ? `Mine total (${item.count} ${item.count === 1 ? "row" : "rows"})`
-                          : item.level === "shaft"
-                            ? `Shaft total (${item.count} ${item.count === 1 ? "row" : "rows"})`
-                            : item.level === "section"
-                              ? `Section total (${item.count} ${item.count === 1 ? "row" : "rows"})`
-                              : item.level === "type"
-                                ? `Subtotal (${item.count} ${item.count === 1 ? "row" : "rows"})`
-                                : item.level === "serial"
-                                  ? `Serial No total (${item.count} ${item.count === 1 ? "row" : "rows"})`
-                                  : `Job No total (${item.count} ${item.count === 1 ? "row" : "rows"})`;
-                      const groupKey = item.__groupKeys && item.__groupKeys.length > 0 ? item.__groupKeys[item.__groupKeys.length - 1] : null;
-                      const isCollapsed = groupKey != null && collapsedKeys.has(groupKey);
-                      return (
-                        <tr key={`subtotal-${item.level}-${item.mineValue ?? "n"}-${item.shaftValue ?? "n"}-${item.sectionValue ?? "n"}-${item.typeValue ?? "n"}-${item.serialValue ?? "n"}-${item.jobNoValue ?? "n"}-${index}`} className={gridSubtotalRowClass}>
-                          {orderedKeys.map((key, i) => {
-                            if (i === 0)
-                              return (
-                                <td key={key} className={gridTdClass}>
-                                  {groupKey != null ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => toggleCollapsed(groupKey)}
-                                      className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-zinc-300 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
-                                      aria-label={isCollapsed ? "Expand" : "Collapse"}
-                                    >
-                                      {isCollapsed ? "▶" : "▼"}
-                                    </button>
-                                  ) : null}
-                                  {label}
-                                </td>
-                              );
-                            if (key === item.mineKey && item.mineValue != null)
-                              return (
-                                <td key={key} className={gridTdClass}>
-                                  {String(item.mineValue)}
-                                </td>
-                              );
-                            if (shaftKey && key === item.shaftKey && item.shaftValue != null)
-                              return (
-                                <td key={key} className={gridTdClass}>
-                                  {String(item.shaftValue)}
-                                </td>
-                              );
-                            if (sectionKey && key === item.sectionKey && item.sectionValue != null)
-                              return (
-                                <td key={key} className={gridTdClass}>
-                                  {String(item.sectionValue)}
-                                </td>
-                              );
-                            if (typeKey && key === item.typeKey && item.typeValue != null)
-                              return (
-                                <td key={key} className={gridTdClass}>
-                                  {String(item.typeValue)}
-                                </td>
-                              );
-                            if (serialKey && key === item.serialKey && item.serialValue != null)
-                              return (
-                                <td key={key} className={gridTdClass}>
-                                  {String(item.serialValue)}
-                                </td>
-                              );
-                            if (jobNoKey && key === item.jobNoKey && item.jobNoValue != null)
-                              return (
-                                <td key={key} className={gridTdClass}>
-                                  {String(item.jobNoValue)}
-                                </td>
-                              );
-                            if (totalKey && key === totalKey)
-                              return (
-                                <td key={key} className={gridTdClass}>
-                                  {formatTotalValue(item.totalSum)}
-                                </td>
-                              );
-                            return <td key={key} className={gridTdClass} />;
-                          })}
-                        </tr>
-                      );
-                    }
-                    const row = item;
+                  {rowsToRender.map((row, index) => {
                     return (
                       <tr key={row.id ?? row.__index ?? index} className={gridRowClass}>
                         {orderedKeys.map((key) => (

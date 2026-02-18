@@ -9,7 +9,8 @@ const childLinkClass =
   "block rounded px-2 py-1.5 text-sm font-medium text-zinc-800 bg-[#FFE4B5] hover:bg-[#FFDAB9] dark:bg-[#FFE4B5] dark:text-zinc-800 dark:hover:bg-[#FFDAB9]";
 const treeLineClass = "border-l-2 border-blue-200 dark:border-blue-600";
 
-export function MenuTree() {
+export function MenuTree({ menuVisibility = {} }) {
+  const v = menuVisibility;
   const [expanded, setExpanded] = useState({
     admin: true,
     functions: true,
@@ -46,51 +47,69 @@ export function MenuTree() {
               className={`mt-0.5 ml-2 pl-3 space-y-0.5 ${treeLineClass}`}
               role="group"
             >
-              <li role="treeitem">
-                <Link href="/permissions" className={childLinkClass}>
-                  Permissions
-                </Link>
-              </li>
-              <li role="treeitem">
-                <Link href="/equipment_categories" className={childLinkClass}>
-                  Equipment Categories
-                </Link>
-              </li>
-              <li role="treeitem">
-                <Link href="/equipment_types" className={childLinkClass}>
-                  Equipment Types
-                </Link>
-              </li>
-              <li role="treeitem">
-                <Link href="/equipment_items" className={childLinkClass}>
-                  Equipment Items
-                </Link>
-              </li>
-              <li role="treeitem">
-                <Link href="/mines" className={childLinkClass}>
-                  Mines
-                </Link>
-              </li>
-              <li role="treeitem">
-                <Link href="/shafts" className={childLinkClass}>
-                  Shafts
-                </Link>
-              </li>
-              <li role="treeitem">
-                <Link href="/sections" className={childLinkClass}>
-                  Sections
-                </Link>
-              </li>
-              <li role="treeitem">
-                <Link href="/gangs" className={childLinkClass}>
-                  Gangs
-                </Link>
-              </li>
-              <li role="treeitem">
-                <Link href="/parts" className={childLinkClass}>
-                  Parts
-                </Link>
-              </li>
+              {v.permissions !== false && (
+                <li role="treeitem">
+                  <Link href="/permissions" className={childLinkClass}>
+                    Permissions
+                  </Link>
+                </li>
+              )}
+              {v.equipmentCategories !== false && (
+                <li role="treeitem">
+                  <Link href="/equipment_categories" className={childLinkClass}>
+                    Equipment Categories
+                  </Link>
+                </li>
+              )}
+              {v.equipmentTypes !== false && (
+                <li role="treeitem">
+                  <Link href="/equipment_types" className={childLinkClass}>
+                    Equipment Types
+                  </Link>
+                </li>
+              )}
+              {v.equipmentItems !== false && (
+                <li role="treeitem">
+                  <Link href="/equipment_items" className={childLinkClass}>
+                    Equipment Items
+                  </Link>
+                </li>
+              )}
+              {v.mines !== false && (
+                <li role="treeitem">
+                  <Link href="/mines" className={childLinkClass}>
+                    Mines
+                  </Link>
+                </li>
+              )}
+              {v.shafts !== false && (
+                <li role="treeitem">
+                  <Link href="/shafts" className={childLinkClass}>
+                    Shafts
+                  </Link>
+                </li>
+              )}
+              {v.sections !== false && (
+                <li role="treeitem">
+                  <Link href="/sections" className={childLinkClass}>
+                    Sections
+                  </Link>
+                </li>
+              )}
+              {v.gangs !== false && (
+                <li role="treeitem">
+                  <Link href="/gangs" className={childLinkClass}>
+                    Gangs
+                  </Link>
+                </li>
+              )}
+              {v.parts !== false && (
+                <li role="treeitem">
+                  <Link href="/parts" className={childLinkClass}>
+                    Parts
+                  </Link>
+                </li>
+              )}
             </ul>
           )}
         </li>
@@ -117,16 +136,20 @@ export function MenuTree() {
               className={`mt-0.5 ml-2 pl-3 space-y-0.5 ${treeLineClass}`}
               role="group"
             >
-              <li role="treeitem">
-                <Link href="/add-job" className={childLinkClass}>
-                  Add Job
-                </Link>
-              </li>
-              <li role="treeitem">
-                <Link href="/notes" className={childLinkClass}>
-                  Notes
-                </Link>
-              </li>
+              {v.addJob !== false && (
+                <li role="treeitem">
+                  <Link href="/add-job" className={childLinkClass}>
+                    Add Job
+                  </Link>
+                </li>
+              )}
+              {v.notes !== false && (
+                <li role="treeitem">
+                  <Link href="/notes" className={childLinkClass}>
+                    Notes
+                  </Link>
+                </li>
+              )}
             </ul>
           )}
         </li>
@@ -158,14 +181,33 @@ export function MenuTree() {
                   Services done
                 </Link>
               </li>
+              {v.equipmentList !== false && (
+                <li role="treeitem">
+                  <Link href="/rpt_service_history" className={childLinkClass}>
+                    Equipment List
+                  </Link>
+                </li>
+              )}
+              {v.serviceList !== false && (
+                <li role="treeitem">
+                  <Link href="/report_servicelist" className={childLinkClass}>
+                    Service list
+                  </Link>
+                </li>
+              )}
               <li role="treeitem">
-                <Link href="/rpt_service_history" className={childLinkClass}>
-                  Equipment List
+                <Link href="/rpt_jobspertechnician" className={childLinkClass}>
+                  Jobs per Technician
                 </Link>
               </li>
               <li role="treeitem">
-                <Link href="/report_servicelist" className={childLinkClass}>
-                  Service list
+                <Link href="/rpt_jobspereqitem" className={childLinkClass}>
+                  Job Count per Equipment Item
+                </Link>
+              </li>
+              <li role="treeitem">
+                <Link href="/rpt_qtyservicedbytype" className={childLinkClass}>
+                  Qty Serviced By type
                 </Link>
               </li>
             </ul>

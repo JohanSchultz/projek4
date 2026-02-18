@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ReportServiceListContent } from "./ReportServiceListContent";
+import { QtysServicedByTypeContent } from "./QtysServicedByTypeContent";
 
 async function signOut() {
   "use server";
@@ -100,38 +100,8 @@ async function fetchGangsBySectionId(sectionId) {
   }
 }
 
-async function fetchServiceListData(
-  equipmentTypeIds,
-  mineId,
-  shaftId,
-  sectionId,
-  dateIn,
-  dateOut
-) {
-  "use server";
-  try {
-    const supabase = await createClient();
-    const ids = Array.isArray(equipmentTypeIds)
-      ? equipmentTypeIds.map(Number).filter((n) => !Number.isNaN(n))
-      : [];
-    const { data, error } = await supabase.rpc("get_servicedlist", {
-      p_equipmenttypes_id: ids,
-      p_mine_id: Number(mineId) || 0,
-      p_shaft_id: Number(shaftId) || 0,
-      p_section_id: Number(sectionId) || 0,
-      p_datein: dateIn || null,
-      p_dateout: dateOut || null,
-    });
-    if (error) throw error;
-    return { data: Array.isArray(data) ? data : [], error: null };
-  } catch (err) {
-    return { data: null, error: err?.message ?? String(err) };
-  }
-}
-
-export default async function ReportServiceListPage() {
-  const { data: equipmentTypes, error: typesError } =
-    await getEquipmentTypes();
+export default async function RptQtysServicedByTypePage() {
+  const { data: equipmentTypes, error: typesError } = await getEquipmentTypes();
   const { data: mines, error: minesError } = await getMines();
   const types = equipmentTypes ?? [];
   const minesList = mines ?? [];
@@ -146,7 +116,7 @@ export default async function ReportServiceListPage() {
           ← Menu
         </Link>
         <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Report service list
+          Qty Serviced By type
         </h1>
         <form action={signOut}>
           <button
@@ -168,13 +138,12 @@ export default async function ReportServiceListPage() {
             {minesError}
           </p>
         )}
-        <ReportServiceListContent
+        <QtysServicedByTypeContent
           equipmentTypes={types}
           mines={minesList}
           fetchShaftsByMineId={fetchShaftsByMineId}
           fetchSectionsByShaftId={fetchSectionsByShaftId}
           fetchGangsBySectionId={fetchGangsBySectionId}
-          fetchServiceListData={fetchServiceListData}
         />
       </main>
     </div>

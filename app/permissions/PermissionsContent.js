@@ -12,6 +12,7 @@ export function PermissionsContent({
   functions,
   getUserFunctions,
   setUserFunction,
+  saveUserPermissions,
 }) {
   const usersList = Array.isArray(users) ? users : [];
   const functionsList = Array.isArray(functions) ? functions : [];
@@ -19,6 +20,8 @@ export function PermissionsContent({
   const [selectedFunctionIds, setSelectedFunctionIds] = useState(() => new Set());
   const [pendingIds, setPendingIds] = useState(new Set());
   const [loadError, setLoadError] = useState(null);
+  const [saveError, setSaveError] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const loadUserFunctions = useCallback(
     (userId) => {
@@ -69,6 +72,18 @@ export function PermissionsContent({
         else next.delete(idStr);
         return next;
       });
+    });
+  };
+
+  const handleSave = () => {
+    if (selectedUserId == null || selectedUserId === "" || typeof saveUserPermissions !== "function") return;
+    setSaveError(null);
+    setSaving(true);
+    saveUserPermissions(selectedUserId, Array.from(selectedFunctionIds)).then((result) => {
+      setSaving(false);
+      if (result?.error) {
+        setSaveError(result.error);
+      }
     });
   };
 
@@ -138,6 +153,21 @@ export function PermissionsContent({
               })}
             </ul>
           )}
+        </div>
+        <div className="mt-3">
+          {saveError && (
+            <p className="mb-2 text-sm text-amber-600 dark:text-amber-400">
+              {saveError}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!selectedUserId || saving}
+            className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
         </div>
       </div>
     </>
