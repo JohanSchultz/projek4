@@ -183,7 +183,7 @@ export function MenuTree({ menuVisibility = {} }) {
               </li>
               {v.equipmentList !== false && (
                 <li role="treeitem">
-                  <Link href="/rpt_service_history" className={childLinkClass}>
+                  <Link href="/rpt_equipmentlist" className={childLinkClass}>
                     Equipment List
                   </Link>
                 </li>
@@ -208,6 +208,16 @@ export function MenuTree({ menuVisibility = {} }) {
               <li role="treeitem">
                 <Link href="/rpt_qtyservicedbytype" className={childLinkClass}>
                   Qty Serviced By type
+                </Link>
+              </li>
+              <li role="treeitem">
+                <Link href="/rpt_indiv_history" className={childLinkClass}>
+                  Individual Item History
+                </Link>
+              </li>
+              <li role="treeitem">
+                <Link href="/rpt_norecentjobs" className={childLinkClass}>
+                  No Recent Jobs
                 </Link>
               </li>
             </ul>

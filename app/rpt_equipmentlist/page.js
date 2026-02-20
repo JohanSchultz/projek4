@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ReportServiceListContent } from "./ReportServiceListContent";
+import { EquipmentListContent } from "./EquipmentListContent";
 
 async function signOut() {
   "use server";
@@ -100,29 +100,30 @@ async function fetchGangsBySectionId(sectionId) {
   }
 }
 
-async function fetchServiceListData(
-  equipmentTypeIds,
-  mineId,
-  shaftId,
-  sectionId,
-  dateIn,
-  dateOut
+async function fetchAllEquipmentItems(
+  p_mine_id,
+  p_shaft_id,
+  p_section_id,
+  p_gang_id,
+  p_equipmenttypes_id
 ) {
   "use server";
   try {
-    const supabase = await createClient();
-    const ids = Array.isArray(equipmentTypeIds)
-      ? equipmentTypeIds.map(Number).filter((n) => !Number.isNaN(n))
+    const mineId = p_mine_id != null ? Number(p_mine_id) : 0;
+    const shaftId = p_shaft_id != null ? Number(p_shaft_id) : 0;
+    const sectionId = p_section_id != null ? Number(p_section_id) : 0;
+    const gangId = p_gang_id != null ? Number(p_gang_id) : 0;
+    const typeIds = Array.isArray(p_equipmenttypes_id)
+      ? p_equipmenttypes_id.map(Number).filter((n) => !Number.isNaN(n))
       : [];
-    const { data, error } = await supabase.rpc("get_servicedlist", {
-      p_equipmenttypes_id: ids,
-      p_mine_id: Number(mineId) || 0,
-      p_shaft_id: Number(shaftId) || 0,
-      p_section_id: Number(sectionId) || 0,
-      p_datein: dateIn || null,
-      p_dateout: dateOut || null,
-    })
-    .range(0, 10000);
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("rpt_all_equipment_items", {
+      p_mine_id: mineId,
+      p_shaft_id: shaftId,
+      p_section_id: sectionId,
+      p_gang_id: gangId,
+      p_equipmenttypes_id: typeIds,
+    });
     if (error) throw error;
     return { data: Array.isArray(data) ? data : [], error: null };
   } catch (err) {
@@ -130,9 +131,8 @@ async function fetchServiceListData(
   }
 }
 
-export default async function ReportServiceListPage() {
-  const { data: equipmentTypes, error: typesError } =
-    await getEquipmentTypes();
+export default async function RptEquipmentListPage() {
+  const { data: equipmentTypes, error: typesError } = await getEquipmentTypes();
   const { data: mines, error: minesError } = await getMines();
   const types = equipmentTypes ?? [];
   const minesList = mines ?? [];
@@ -147,7 +147,7 @@ export default async function ReportServiceListPage() {
           ← Menu
         </Link>
         <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Report service list
+          Equipment List
         </h1>
         <form action={signOut}>
           <button
@@ -169,13 +169,13 @@ export default async function ReportServiceListPage() {
             {minesError}
           </p>
         )}
-        <ReportServiceListContent
+        <EquipmentListContent
           equipmentTypes={types}
           mines={minesList}
           fetchShaftsByMineId={fetchShaftsByMineId}
           fetchSectionsByShaftId={fetchSectionsByShaftId}
           fetchGangsBySectionId={fetchGangsBySectionId}
-          fetchServiceListData={fetchServiceListData}
+          fetchAllEquipmentItems={fetchAllEquipmentItems}
         />
       </main>
     </div>

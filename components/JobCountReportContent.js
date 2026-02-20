@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { VirtualGrid } from "@/components/VirtualGrid";
-import { exportToExcelFromRows } from "@/lib/export-utils";
+import { exportJobCountPerEquipmentItemToExcel } from "@/lib/export-utils";
 
 const inputClass =
   "rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:focus:border-zinc-400 dark:focus:ring-zinc-400";
@@ -142,7 +142,16 @@ export function JobCountReportContent({ getJobCountPerItem }) {
     for (const item of rowsToRender) {
       if (item.__subtotal) {
         const label = `Type total (${item.count} ${item.count === 1 ? "row" : "rows"})`;
-        rows.push([label, "", "", "", "", "", "", item.jobCountSum ?? ""]);
+        rows.push([
+          label,
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          formatJobCountValue(item.jobCountSum),
+        ]);
       } else {
         const typeVal = item[TYPE_KEY] != null && item.__showType ? formatCellValue(item[TYPE_KEY]) : "";
         rows.push([
@@ -153,11 +162,16 @@ export function JobCountReportContent({ getJobCountPerItem }) {
           formatCellValue(item.shaft),
           formatCellValue(item.section),
           formatCellValue(item.gang),
-          item[JOBCOUNT_KEY] != null ? item[JOBCOUNT_KEY] : "",
+          formatJobCountValue(item[JOBCOUNT_KEY]),
         ]);
       }
     }
-    exportToExcelFromRows(rows, "jobcount_per_equipment_item.xlsx", "Job Count per Item");
+    exportJobCountPerEquipmentItemToExcel(
+      rows,
+      "jobcount_per_equipment_item.xlsx",
+      "Job Count per Item",
+      { fromDate, toDate }
+    );
   };
 
   return (
@@ -227,7 +241,7 @@ export function JobCountReportContent({ getJobCountPerItem }) {
             <button
               type="button"
               onClick={handleExportToExcel}
-              className="rounded bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-700 dark:hover:bg-green-600"
+              className="rounded bg-green-200 px-3 py-2 text-sm font-medium text-zinc-900 hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-700 dark:text-zinc-100 dark:hover:bg-green-600"
             >
               Export to Excel
             </button>

@@ -82,7 +82,7 @@ export function ReportServiceListContent({
         </p>
       )}
       {!isPending && gridData && gridData.length > 0 && (
-        <div className="invisible absolute h-0 w-0 overflow-hidden">
+        <div className="overflow-auto">
           <hr className="mb-4 border-zinc-300 dark:border-zinc-600" />
           <div className="mb-2 flex justify-between">
             <button

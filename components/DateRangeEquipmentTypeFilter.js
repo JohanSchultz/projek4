@@ -21,6 +21,8 @@ const checkboxClass =
  * @param {(sectionId: number) => Promise<{ data: { id: number, descr: string }[] }>} [props.fetchGangsBySectionId] - Fetches gangs for section
  * @param {(value: { fromDate, toDate, selectedIds, selectedMineId, selectedShaftId, selectedSectionId, selectedGangId }) => void} [props.onChange] - Called when any value changes
  * @param {(params: { fromDate, toDate, selectedIds, selectedMineId, selectedShaftId, selectedSectionId }) => void} [props.onShowReport] - When provided, a "Show Report" button is shown; called with current filter values when clicked
+ * @param {boolean} [props.hideDateRange] - When true, the From and To date pickers are not displayed
+ * @param {boolean} [props.showDaysSinceLastJobInput] - When true, show "Days Since Last Job" textbox (integer only) and Show Report button to the right of the checkbox list
  */
 export function DateRangeEquipmentTypeFilter({
   equipmentTypes = [],
@@ -33,6 +35,8 @@ export function DateRangeEquipmentTypeFilter({
   initialSelectedIds = [],
   onChange,
   onShowReport,
+  hideDateRange = false,
+  showDaysSinceLastJobInput = false,
 }) {
   const [fromDate, setFromDate] = useState(initialFromDate);
   const [toDate, setToDate] = useState(initialToDate);
@@ -49,6 +53,7 @@ export function DateRangeEquipmentTypeFilter({
   const [selectedIds, setSelectedIds] = useState(
     () => new Set(initialSelectedIds.map(Number))
   );
+  const [daysSinceLastJob, setDaysSinceLastJob] = useState("180");
 
   useEffect(() => {
     setFromDate(initialFromDate);
@@ -230,36 +235,40 @@ export function DateRangeEquipmentTypeFilter({
 
   return (
     <div className="flex flex-wrap gap-6">
-      <div>
-        <label
-          htmlFor="filter-from-date"
-          className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-        >
-          From
-        </label>
-        <input
-          type="date"
-          id="filter-from-date"
-          value={fromDate}
-          onChange={handleFromChange}
-          className={inputClass}
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="filter-to-date"
-          className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-        >
-          To
-        </label>
-        <input
-          type="date"
-          id="filter-to-date"
-          value={toDate}
-          onChange={handleToChange}
-          className={inputClass}
-        />
-      </div>
+      {!hideDateRange && (
+        <>
+          <div>
+            <label
+              htmlFor="filter-from-date"
+              className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            >
+              From
+            </label>
+            <input
+              type="date"
+              id="filter-from-date"
+              value={fromDate}
+              onChange={handleFromChange}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="filter-to-date"
+              className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            >
+              To
+            </label>
+            <input
+              type="date"
+              id="filter-to-date"
+              value={toDate}
+              onChange={handleToChange}
+              className={inputClass}
+            />
+          </div>
+        </>
+      )}
       <div className="flex flex-col gap-3">
         <div>
           <label
@@ -400,7 +409,75 @@ export function DateRangeEquipmentTypeFilter({
           </div>
         )}
       </div>
-      {typeof onShowReport === "function" && (
+      {showDaysSinceLastJobInput && (
+        <>
+          <div>
+            <label
+              htmlFor="filter-days-since-last-job"
+              className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            >
+              Days Since Last Job
+            </label>
+            <input
+              type="number"
+              id="filter-days-since-last-job"
+              name="days_since_last_job"
+              value={daysSinceLastJob}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === "" || /^\d*$/.test(v)) setDaysSinceLastJob(v);
+              }}
+              min={0}
+              step={1}
+              placeholder=""
+              className={inputClass}
+              aria-label="Days Since Last Job"
+            />
+          </div>
+          {typeof onShowReport === "function" && (
+            <div className="flex items-end">
+              <button
+                type="button"
+                onClick={() =>
+                  onShowReport({
+                    fromDate,
+                    toDate,
+                    selectedIds: Array.from(selectedIds),
+                    selectedMineId,
+                    selectedShaftId,
+                    selectedSectionId,
+                    selectedGangId,
+                    daysSinceLastJob: daysSinceLastJob === "" ? null : parseInt(daysSinceLastJob, 10),
+                    equipmentTypeLabels: Array.from(selectedIds)
+                      .map((id) => types.find((t) => t.id === id)?.descr ?? String(id))
+                      .filter(Boolean),
+                    mineLabel:
+                      selectedMineId === 0
+                        ? "ALL"
+                        : minesList.find((m) => m.id === selectedMineId)?.descr ?? "",
+                    shaftLabel:
+                      selectedShaftId === 0
+                        ? "ALL"
+                        : shaftsList.find((s) => s.id === selectedShaftId)?.descr ?? "",
+                    sectionLabel:
+                      selectedSectionId === 0
+                        ? "ALL"
+                        : sectionsList.find((sec) => sec.id === selectedSectionId)?.descr ?? "",
+                    gangLabel:
+                      selectedGangId === 0
+                        ? "ALL"
+                        : gangsList.find((g) => g.id === selectedGangId)?.descr ?? "",
+                  })
+                }
+                className="rounded border border-sky-300 bg-sky-200 px-4 py-2 text-sm font-medium text-sky-900 shadow-sm hover:bg-sky-300 dark:border-sky-600 dark:bg-sky-700 dark:text-sky-100 dark:hover:bg-sky-600"
+              >
+                Show Report
+              </button>
+            </div>
+          )}
+        </>
+      )}
+      {!showDaysSinceLastJobInput && typeof onShowReport === "function" && (
         <div className="flex items-end">
           <button
             type="button"

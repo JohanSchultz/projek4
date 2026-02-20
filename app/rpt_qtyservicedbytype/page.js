@@ -100,6 +100,41 @@ async function fetchGangsBySectionId(sectionId) {
   }
 }
 
+async function fetchJobCountByType(
+  p_mine_id,
+  p_shaft_id,
+  p_section_id,
+  p_gang_id,
+  p_equipmenttypes_id,
+  p_datein,
+  p_dateout
+) {
+  "use server";
+  try {
+    const mineId = p_mine_id != null ? Number(p_mine_id) : 0;
+    const shaftId = p_shaft_id != null ? Number(p_shaft_id) : 0;
+    const sectionId = p_section_id != null ? Number(p_section_id) : 0;
+    const gangId = p_gang_id != null ? Number(p_gang_id) : 0;
+    const typeIds = Array.isArray(p_equipmenttypes_id)
+      ? p_equipmenttypes_id.map(Number).filter((n) => !Number.isNaN(n))
+      : [];
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("rpt_jobcountbytype", {
+      p_mine_id: mineId,
+      p_shaft_id: shaftId,
+      p_section_id: sectionId,
+      p_gang_id: gangId,
+      p_equipmenttypes_id: typeIds,
+      p_datein: p_datein || null,
+      p_dateout: p_dateout || null,
+    });
+    if (error) throw error;
+    return { data: Array.isArray(data) ? data : [], error: null };
+  } catch (err) {
+    return { data: null, error: err?.message ?? String(err) };
+  }
+}
+
 export default async function RptQtysServicedByTypePage() {
   const { data: equipmentTypes, error: typesError } = await getEquipmentTypes();
   const { data: mines, error: minesError } = await getMines();
@@ -144,6 +179,7 @@ export default async function RptQtysServicedByTypePage() {
           fetchShaftsByMineId={fetchShaftsByMineId}
           fetchSectionsByShaftId={fetchSectionsByShaftId}
           fetchGangsBySectionId={fetchGangsBySectionId}
+          fetchJobCountByType={fetchJobCountByType}
         />
       </main>
     </div>

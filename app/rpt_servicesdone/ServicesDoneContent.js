@@ -2,12 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { DateRangeEquipmentTypeFilter } from "@/components/DateRangeEquipmentTypeFilter";
+import { exportServicesDoneToExcel } from "@/lib/export-utils";
 
 const gridRowClass =
   "border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/50";
 const gridThClass =
-  "border-b border-zinc-200 bg-zinc-100 px-4 py-3 font-semibold text-left text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300";
-const gridTdClass = "px-4 py-3 text-xs text-zinc-800 dark:text-zinc-200";
+  "border-b border-zinc-200 bg-zinc-100 px-4 py-3 font-semibold text-left text-[0.625rem] text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300";
+const gridTdClass = "px-4 py-3 text-[0.625rem] text-zinc-800 dark:text-zinc-200";
 
 const gridColumnHeaders = {
   serialno: "Serial No",
@@ -69,6 +70,12 @@ function findTotalKey(orderedKeys) {
   const normalized = orderedKeys.map((k) => [k.toLowerCase().replace(/_/g, ""), k]);
   const match = normalized.find(([n]) => n === "cost" || n === "total");
   return match ? match[1] : orderedKeys.find((k) => /total|cost/.test(k.toLowerCase().replace(/_/g, ""))) ?? null;
+}
+
+function findPartKey(orderedKeys) {
+  const normalized = orderedKeys.map((k) => [k.toLowerCase().replace(/_/g, ""), k]);
+  const match = normalized.find(([n]) => n === "part");
+  return match ? match[1] : orderedKeys.find((k) => /^part$/.test(k.toLowerCase().replace(/_/g, ""))) ?? null;
 }
 
 function numericTotal(row, totalKey) {
@@ -519,6 +526,31 @@ export function ServicesDoneContent({
   const [gridData, setGridData] = useState([]);
   const [reportError, setReportError] = useState(null);
   const [isPending, startTransition] = useTransition();
+  const [lastFilterForExport, setLastFilterForExport] = useState(null);
+
+  const handleExportToExcel = () => {
+    if (!gridData.length) return;
+    const orderedKeys = Object.keys(gridData[0]);
+    const totalKey = findTotalKey(orderedKeys);
+    const headers = orderedKeys.map((k) => getGridColumnHeader(k));
+    const rows = [headers, ...gridData.map((row) =>
+      orderedKeys.map((key) =>
+        key === totalKey ? formatTotalValue(row[key]) : formatGridValue(row[key])
+      )
+    )];
+    const filterOpts = lastFilterForExport
+      ? {
+          fromDate: lastFilterForExport.fromDate,
+          toDate: lastFilterForExport.toDate,
+          mine: lastFilterForExport.mineLabel ?? "",
+          shaft: lastFilterForExport.shaftLabel ?? "",
+          section: lastFilterForExport.sectionLabel ?? "",
+          gang: lastFilterForExport.gangLabel ?? "",
+          equipmentTypeLabels: lastFilterForExport.equipmentTypeLabels ?? [],
+        }
+      : {};
+    exportServicesDoneToExcel(rows, "services_done.xlsx", "Services Done", filterOpts);
+  };
 
   const handleShowReport = (params) => {
     setReportError(null);
@@ -538,6 +570,7 @@ export function ServicesDoneContent({
         setGridData([]);
       } else {
         setGridData(Array.isArray(result?.data) ? result.data : []);
+        setLastFilterForExport(params);
       }
     });
   };
@@ -573,22 +606,34 @@ export function ServicesDoneContent({
         )}
         {!isPending && !reportError && gridData.length > 0 && (() => {
           const orderedKeys = Object.keys(gridData[0]);
-          const groupedRows = rowsWithMineShaftSectionGrouping(gridData, orderedKeys);
-          const rowsToRender = groupedRows.filter((row) => !row.__subtotal);
-          const mineKey = findMineKey(orderedKeys);
-          const shaftKey = findShaftKey(orderedKeys);
-          const sectionKey = findSectionKey(orderedKeys);
-          const typeKey = findTypeKey(orderedKeys);
-          const serialKey = findSerialNoKey(orderedKeys);
-          const jobNoKey = findJobNoKey(orderedKeys);
+          const rowsToRender = gridData;
           const totalKey = findTotalKey(orderedKeys);
+          const partKey = findPartKey(orderedKeys);
+          const getThClass = (key) =>
+            gridThClass +
+            (key === totalKey ? " text-right" : "") +
+            (key === partKey ? " max-w-0 truncate" : "");
+          const getTdClass = (key) =>
+            gridTdClass +
+            (key === totalKey ? " text-right tabular-nums" : "") +
+            (key === partKey ? " max-w-0 truncate" : "");
           return (
-            <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
+            <>
+              <div className="mb-3">
+                <button
+                  type="button"
+                  onClick={handleExportToExcel}
+                  className="rounded bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-700 dark:hover:bg-green-600"
+                >
+                  Export to Excel
+                </button>
+              </div>
+              <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
               <table className="w-full min-w-[32rem] table-fixed text-left text-xs">
                 <thead>
                   <tr>
                     {orderedKeys.map((key) => (
-                      <th key={key} className={gridThClass}>
+                      <th key={key} className={getThClass(key)}>
                         {getGridColumnHeader(key)}
                       </th>
                     ))}
@@ -599,22 +644,10 @@ export function ServicesDoneContent({
                     return (
                       <tr key={row.id ?? row.__index ?? index} className={gridRowClass}>
                         {orderedKeys.map((key) => (
-                          <td key={key} className={gridTdClass}>
-                            {key === mineKey && !row.__showMine
-                              ? ""
-                              : key === shaftKey && !row.__showShaft
-                                ? ""
-                                : key === sectionKey && !row.__showSection
-                                  ? ""
-                                  : key === typeKey && !row.__showType
-                                    ? ""
-                                    : key === serialKey && !row.__showSerial
-                                      ? ""
-                                      : key === jobNoKey && row.__showJobNoInSerial === false
-                                        ? ""
-                                        : key === totalKey
-                                          ? formatTotalValue(row[key])
-                                          : formatGridValue(row[key])}
+                          <td key={key} className={getTdClass(key)}>
+                            {key === totalKey
+                              ? formatTotalValue(row[key])
+                              : formatGridValue(row[key])}
                           </td>
                         ))}
                       </tr>
@@ -623,6 +656,7 @@ export function ServicesDoneContent({
                 </tbody>
               </table>
             </div>
+            </>
           );
         })()}
       </div>

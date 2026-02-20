@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { exportJobsPerTechnicianToExcel } from "@/lib/export-utils";
 
 const inputClass =
   "rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:focus:border-zinc-400 dark:focus:ring-zinc-400";
@@ -144,6 +145,37 @@ export function JobsPerTechnicianContent({ getJobsPerTechnician }) {
     });
   };
 
+  const handleExportToExcel = () => {
+    if (!gridData.length) return;
+    const headers = orderedKeys.map((k) => getGridColumnHeader(k));
+    const dataRows = rowsToRender.map((item) => {
+      if (item.__subtotal) {
+        const label = `Technician total (${item.count} ${item.count === 1 ? "row" : "rows"})`;
+        return orderedKeys.map((key, i) => {
+          if (i === 0) return label;
+          if (technicianKey && key === item.technicianKey && item.technicianValue != null)
+            return String(item.technicianValue);
+          if (jobCountKey && key === jobCountKey && item.jobCountSum != null)
+            return formatJobCountValue(item.jobCountSum);
+          if (totalKey && key === totalKey && item.totalSum != null && key !== jobCountKey)
+            return formatTotalValue(item.totalSum);
+          return "";
+        });
+      }
+      const row = item;
+      return orderedKeys.map((key) => {
+        if (technicianKey && key === technicianKey && !row.__showTechnician) return "";
+        if (jobCountKey && key === jobCountKey) return formatJobCountValue(row[key]);
+        return formatCellValue(row[key]);
+      });
+    });
+    const rows = [headers, ...dataRows];
+    exportJobsPerTechnicianToExcel(rows, "jobs_per_technician.xlsx", "Jobs per Technician", {
+      fromDate,
+      toDate,
+    });
+  };
+
   const handleShowReport = () => {
     setReportError(null);
     if (typeof getJobsPerTechnician !== "function") return;
@@ -220,7 +252,17 @@ export function JobsPerTechnicianContent({ getJobsPerTechnician }) {
           </p>
         )}
         {!isPending && !reportError && gridData.length > 0 && (
-          <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
+          <>
+            <div className="mb-3">
+              <button
+                type="button"
+                onClick={handleExportToExcel}
+                className="rounded bg-green-200 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-700 dark:text-zinc-100 dark:hover:bg-green-600"
+              >
+                Export to Excel
+              </button>
+            </div>
+            <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
             <table className="w-full min-w-[32rem] table-fixed text-left text-xs">
               <thead>
                 <tr>
@@ -297,6 +339,7 @@ export function JobsPerTechnicianContent({ getJobsPerTechnician }) {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
     </>
