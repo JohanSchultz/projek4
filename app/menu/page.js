@@ -53,6 +53,7 @@ export default async function MenuPage() {
     gangs: hasFunctionId(gridRows, 7),
     parts: hasFunctionId(gridRows, 8),
     addJob: hasFunctionId(gridRows, 9),
+    editJob: hasFunctionId(gridRows, 14),
     notes: hasFunctionId(gridRows, 10),
     equipmentList: hasFunctionId(gridRows, 11),
     serviceList: hasFunctionId(gridRows, 12),

@@ -143,6 +143,13 @@ export function MenuTree({ menuVisibility = {} }) {
                   </Link>
                 </li>
               )}
+              {v.editJob !== false && (
+                <li role="treeitem">
+                  <Link href="/edit-job" className={childLinkClass}>
+                    Edit Job
+                  </Link>
+                </li>
+              )}
               {v.notes !== false && (
                 <li role="treeitem">
                   <Link href="/notes" className={childLinkClass}>

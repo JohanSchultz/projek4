@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AddJobContent } from "./AddJobContent";
+import { EditJobContent } from "./EditJobContent";
 
 async function signOut() {
   "use server";
@@ -56,6 +56,38 @@ async function fetchPartsByTypeId(typeId) {
   }
 }
 
+async function fetchPartsPerJob(pJobId) {
+  "use server";
+  try {
+    const id = Number(pJobId);
+    if (Number.isNaN(id)) return { data: [], error: null };
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("partsperjob", {
+      p_job_id: id,
+    });
+    if (error) throw error;
+    return { data: Array.isArray(data) ? data : [], error: null };
+  } catch (err) {
+    return { data: null, error: err?.message ?? String(err) };
+  }
+}
+
+async function fetchJobListPerItem(pEquipmentItemsId) {
+  "use server";
+  try {
+    const id = Number(pEquipmentItemsId);
+    if (Number.isNaN(id)) return { data: [], error: null };
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("joblistperitem", {
+      p_equipmentitems_id: id,
+    });
+    if (error) throw error;
+    return { data: Array.isArray(data) ? data : [], error: null };
+  } catch (err) {
+    return { data: null, error: err?.message ?? String(err) };
+  }
+}
+
 async function fetchItemsPerType(typeId) {
   "use server";
   try {
@@ -72,8 +104,8 @@ async function fetchItemsPerType(typeId) {
   }
 }
 
-async function insertJob(
-  p_equipmentitems_id,
+async function updateJob(
+  p_job_id,
   p_technician_id,
   p_datein,
   p_dateout,
@@ -81,22 +113,38 @@ async function insertJob(
 ) {
   "use server";
   try {
+    const jobId = Number(p_job_id);
+    if (Number.isNaN(jobId)) return { error: "Invalid job ID" };
     const supabase = await createClient();
-    const { data, error } = await supabase.rpc("insert_job", {
-      p_equipmentitems_id: Number(p_equipmentitems_id) || null,
-      p_technician_id: Number(p_technician_id) || null,
-      p_datein: p_datein || null,
-      p_dateout: p_dateout || null,
-      p_comments: p_comments ?? null,
+    const { error } = await supabase
+      .from("jobs")
+      .update({
+        technician_id: p_technician_id ? Number(p_technician_id) : null,
+        datein: p_datein || null,
+        dateout: p_dateout || null,
+        comments: p_comments ?? null,
+      })
+      .eq("id", jobId);
+    if (error) throw error;
+    return { error: null };
+  } catch (err) {
+    return { error: err?.message ?? String(err) };
+  }
+}
+
+async function deletePartsPerJob(pJobId) {
+  "use server";
+  try {
+    const id = Number(pJobId);
+    if (Number.isNaN(id)) return { error: "Invalid job ID" };
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("delete_partsperjob", {
+      p_job_id: id,
     });
     if (error) throw error;
-    const result =
-      typeof data === "number"
-        ? data
-        : data?.insert_job ?? (Array.isArray(data) ? data[0]?.insert_job : null);
-    return { insertJob: result ?? null, error: null };
+    return { error: null };
   } catch (err) {
-    return { insertJob: null, error: err?.message ?? String(err) };
+    return { error: err?.message ?? String(err) };
   }
 }
 
@@ -126,7 +174,7 @@ async function insertPartsPerJob(
   }
 }
 
-export default async function AddJobPage() {
+export default async function EditJobPage() {
   const { data: equipmentTypes, error: typesError } =
     await getEquipmentTypes();
   const { data: technicians, error: techniciansError } =
@@ -152,7 +200,7 @@ export default async function AddJobPage() {
           ← Menu
         </Link>
         <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Add Job
+          Edit Job
         </h1>
         <form action={signOut}>
           <button
@@ -174,13 +222,16 @@ export default async function AddJobPage() {
             {techniciansError}
           </p>
         )}
-        <AddJobContent
+        <EditJobContent
           equipmentTypes={types}
           technicians={techList}
           initialPartsData={initialParts}
           fetchPartsByTypeId={fetchPartsByTypeId}
           fetchItemsPerType={fetchItemsPerType}
-          insertJob={insertJob}
+          fetchJobListPerItem={fetchJobListPerItem}
+          fetchPartsPerJob={fetchPartsPerJob}
+          updateJob={updateJob}
+          deletePartsPerJob={deletePartsPerJob}
           insertPartsPerJob={insertPartsPerJob}
         />
       </main>
