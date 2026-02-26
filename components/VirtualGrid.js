@@ -17,8 +17,9 @@ const ROW_HEIGHT = 36;
  * @param {Array<Record<string, unknown>>} props.data - Row data
  * @param {number} [props.height=500] - Fixed height of the scrollable area (px)
  * @param {string} [props.className] - Optional class for the wrapper
+ * @param {string} [props.tableClassName] - Optional class for the table (e.g. text-xs for smaller font)
  */
-export function VirtualGrid({ columns, data, height = 500, className = "" }) {
+export function VirtualGrid({ columns, data, height = 500, className = "", tableClassName = "text-sm" }) {
   const parentRef = useRef(null);
 
   const columnDefs = useMemo(
@@ -68,7 +69,7 @@ export function VirtualGrid({ columns, data, height = 500, className = "" }) {
       style={{ height: `${height}px` }}
     >
       <div style={{ height: `${totalSize}px`, position: "relative" }}>
-        <table className="w-full border-collapse text-sm table-fixed">
+        <table className={`w-full border-collapse table-fixed ${tableClassName}`}>
           <thead className="sticky top-0 z-10 bg-zinc-100 dark:bg-zinc-800">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>

@@ -133,9 +133,23 @@ export function DateRangeEquipmentTypeFilter({
     };
   }, [selectedSectionId, fetchGangsBySectionId]);
 
+  const types = Array.isArray(equipmentTypes) ? equipmentTypes : [];
+  const minesList = Array.isArray(mines) ? mines : [];
+
   const notify = useCallback(
     (nextFrom, nextTo, nextSet, nextMineId, nextShaftId, nextSectionId, nextGangId) => {
       if (typeof onChange === "function") {
+        const mineLabel =
+          nextMineId === 0 ? "ALL" : minesList.find((m) => m.id === nextMineId)?.descr ?? "";
+        const shaftLabel =
+          nextShaftId === 0 ? "ALL" : shaftsList.find((s) => s.id === nextShaftId)?.descr ?? "";
+        const sectionLabel =
+          nextSectionId === 0 ? "ALL" : sectionsList.find((sec) => sec.id === nextSectionId)?.descr ?? "";
+        const gangLabel =
+          nextGangId === 0 ? "ALL" : gangsList.find((g) => g.id === nextGangId)?.descr ?? "";
+        const equipmentTypeLabels = Array.from(nextSet)
+          .map((id) => types.find((t) => t.id === id)?.descr ?? String(id))
+          .filter(Boolean);
         onChange({
           fromDate: nextFrom,
           toDate: nextTo,
@@ -144,10 +158,15 @@ export function DateRangeEquipmentTypeFilter({
           selectedShaftId: nextShaftId,
           selectedSectionId: nextSectionId,
           selectedGangId: nextGangId,
+          mineLabel,
+          shaftLabel,
+          sectionLabel,
+          gangLabel,
+          equipmentTypeLabels,
         });
       }
     },
-    [onChange]
+    [onChange, types, minesList, shaftsList, sectionsList, gangsList]
   );
 
   const handleFromChange = useCallback(
@@ -225,15 +244,12 @@ export function DateRangeEquipmentTypeFilter({
     notify(fromDate, toDate, next, selectedMineId, selectedShaftId, selectedSectionId, selectedGangId);
   }, [fromDate, toDate, selectedMineId, selectedShaftId, selectedSectionId, selectedGangId, notify]);
 
-  const types = Array.isArray(equipmentTypes) ? equipmentTypes : [];
-
   const handleSelectAll = useCallback(() => {
     const typeIds = types.map((t) => t.id);
     const next = new Set(typeIds);
     setSelectedIds(next);
     notify(fromDate, toDate, next, selectedMineId, selectedShaftId, selectedSectionId, selectedGangId);
   }, [fromDate, toDate, selectedMineId, selectedShaftId, selectedSectionId, selectedGangId, notify, types]);
-  const minesList = Array.isArray(mines) ? mines : [];
 
   return (
     <div className="flex flex-wrap gap-6">

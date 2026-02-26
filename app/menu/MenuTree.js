@@ -247,6 +247,11 @@ export function MenuTree({ menuVisibility = {} }) {
                   Part Usage As % of Jobs
                 </Link>
               </li>
+              <li role="treeitem">
+                <Link href="/rpt_equipmentabuse" className={childLinkClass}>
+                  Equipment Abuse
+                </Link>
+              </li>
             </ul>
           )}
         </li>
