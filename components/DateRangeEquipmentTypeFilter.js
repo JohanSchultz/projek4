@@ -23,6 +23,7 @@ const checkboxClass =
  * @param {(params: { fromDate, toDate, selectedIds, selectedMineId, selectedShaftId, selectedSectionId }) => void} [props.onShowReport] - When provided, a "Show Report" button is shown; called with current filter values when clicked
  * @param {boolean} [props.hideDateRange] - When true, the From and To date pickers are not displayed
  * @param {boolean} [props.showDaysSinceLastJobInput] - When true, show "Days Since Last Job" textbox (integer only) and Show Report button to the right of the checkbox list
+ * @param {boolean} [props.showReportNextToSelectAll] - When true and onShowReport is set, render Show Report button to the right of the Select All button (light blue)
  */
 export function DateRangeEquipmentTypeFilter({
   equipmentTypes = [],
@@ -37,6 +38,7 @@ export function DateRangeEquipmentTypeFilter({
   onShowReport,
   hideDateRange = false,
   showDaysSinceLastJobInput = false,
+  showReportNextToSelectAll = false,
 }) {
   const [fromDate, setFromDate] = useState(initialFromDate);
   const [toDate, setToDate] = useState(initialToDate);
@@ -391,7 +393,7 @@ export function DateRangeEquipmentTypeFilter({
           )}
         </div>
         {types.length > 0 && (
-          <div className="mt-2 flex w-full min-w-[12rem] justify-between">
+          <div className="mt-2 flex w-full min-w-[12rem] items-center justify-between">
             <button
               type="button"
               onClick={handleSelectNone}
@@ -477,8 +479,48 @@ export function DateRangeEquipmentTypeFilter({
           )}
         </>
       )}
-      {!showDaysSinceLastJobInput && typeof onShowReport === "function" && (
+      {!showDaysSinceLastJobInput && typeof onShowReport === "function" && !showReportNextToSelectAll && (
         <div className="flex items-end">
+          <button
+            type="button"
+            onClick={() =>
+              onShowReport({
+                fromDate,
+                toDate,
+                selectedIds: Array.from(selectedIds),
+                selectedMineId,
+                selectedShaftId,
+                selectedSectionId,
+                selectedGangId,
+                equipmentTypeLabels: Array.from(selectedIds)
+                  .map((id) => types.find((t) => t.id === id)?.descr ?? String(id))
+                  .filter(Boolean),
+                mineLabel:
+                  selectedMineId === 0
+                    ? "ALL"
+                    : minesList.find((m) => m.id === selectedMineId)?.descr ?? "",
+                shaftLabel:
+                  selectedShaftId === 0
+                    ? "ALL"
+                    : shaftsList.find((s) => s.id === selectedShaftId)?.descr ?? "",
+                sectionLabel:
+                  selectedSectionId === 0
+                    ? "ALL"
+                    : sectionsList.find((sec) => sec.id === selectedSectionId)?.descr ?? "",
+                gangLabel:
+                  selectedGangId === 0
+                    ? "ALL"
+                    : gangsList.find((g) => g.id === selectedGangId)?.descr ?? "",
+              })
+            }
+            className="rounded border border-sky-300 bg-sky-200 px-4 py-2 text-sm font-medium text-sky-900 shadow-sm hover:bg-sky-300 dark:border-sky-600 dark:bg-sky-700 dark:text-sky-100 dark:hover:bg-sky-600"
+          >
+            Show Report
+          </button>
+        </div>
+      )}
+      {showReportNextToSelectAll && typeof onShowReport === "function" && (
+        <div className="w-full mt-2 flex justify-end">
           <button
             type="button"
             onClick={() =>

@@ -227,6 +227,26 @@ export function MenuTree({ menuVisibility = {} }) {
                   No Recent Jobs
                 </Link>
               </li>
+              <li role="treeitem">
+                <Link href="/rpt_costbyareaandtype" className={childLinkClass}>
+                  Cost by Area and Type
+                </Link>
+              </li>
+              <li role="treeitem">
+                <Link href="/rpt_partstocklevels" className={childLinkClass}>
+                  Part Stock Levels
+                </Link>
+              </li>
+              <li role="treeitem">
+                <Link href="/rpt_averagepartusagepermonth" className={childLinkClass}>
+                  Average Part Usage Per Month
+                </Link>
+              </li>
+              <li role="treeitem">
+                <Link href="/rpt_partusageaspercofjobs" className={childLinkClass}>
+                  Part Usage As % of Jobs
+                </Link>
+              </li>
             </ul>
           )}
         </li>
