@@ -77,7 +77,7 @@ export default async function MenuPage() {
       </header>
       <div className="flex flex-1">
       <aside
-        className="flex w-56 shrink-0 flex-col border-r border-zinc-200 bg-[#00008B] dark:border-zinc-700 dark:bg-[#00008B]"
+        className="flex w-[28rem] shrink-0 flex-col border-r border-zinc-200 bg-[#00008B] dark:border-zinc-700 dark:bg-[#00008B]"
         aria-label="Navigation"
       >
         <div className="p-4">
