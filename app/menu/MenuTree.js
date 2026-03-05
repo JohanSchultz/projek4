@@ -116,6 +116,11 @@ export function MenuTree({ menuVisibility = {} }) {
                   </Link>
                 </li>
               )}
+              <li role="treeitem">
+                <Link href="/partsuppliers" className={childLinkClass}>
+                  Part Suppliers
+                </Link>
+              </li>
             </ul>
           )}
         </li>
@@ -321,6 +326,11 @@ export function MenuTree({ menuVisibility = {} }) {
                         Monthly Cost Per Equipment Type
                       </Link>
                     </li>
+                    <li role="treeitem">
+                      <Link href="/rpt_costperitem" className={childLinkClass}>
+                        Cost Per Equipment Item
+                      </Link>
+                    </li>
                   </ul>
                 )}
               </li>
@@ -362,6 +372,16 @@ export function MenuTree({ menuVisibility = {} }) {
                     <li role="treeitem">
                       <Link href="/rpt_equipmentabuse" className={childLinkClass}>
                         Equipment Abuse
+                      </Link>
+                    </li>
+                    <li role="treeitem">
+                      <Link href="/rpt_equipmentpopulationbyarea" className={childLinkClass}>
+                        Equipment Population By Area
+                      </Link>
+                    </li>
+                    <li role="treeitem">
+                      <Link href="/rpt_meantimebetweenfailures" className={childLinkClass}>
+                        Mean Time Between Failures
                       </Link>
                     </li>
                   </ul>

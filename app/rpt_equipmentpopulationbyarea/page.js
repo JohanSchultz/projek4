@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AddJobContent } from "./AddJobContent";
+import { EquipmentPopulationByAreaContent } from "./EquipmentPopulationByAreaContent";
 
 async function signOut() {
   "use server";
@@ -15,21 +15,6 @@ async function getEquipmentTypes() {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("equipmenttypes")
-      .select("id, descr")
-      .eq("isactive", true)
-      .order("descr", { ascending: true });
-    if (error) throw error;
-    return { data: data ?? [], error: null };
-  } catch (err) {
-    return { data: null, error: err?.message ?? String(err) };
-  }
-}
-
-async function getTechnicians() {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("technicians")
       .select("id, descr")
       .eq("isactive", true)
       .order("descr", { ascending: true });
@@ -115,135 +100,42 @@ async function fetchGangsBySectionId(sectionId) {
   }
 }
 
-async function fetchEquipmentItemById(itemId) {
-  "use server";
-  try {
-    const id = Number(itemId);
-    if (Number.isNaN(id) || id === 0) return { data: null, error: null };
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("equipmentitems")
-      .select("mine_id, shaft_id, section_id, gang_id")
-      .eq("id", id)
-      .maybeSingle();
-    if (error) throw error;
-    return { data: data ?? null, error: null };
-  } catch (err) {
-    return { data: null, error: err?.message ?? String(err) };
-  }
-}
-
-async function fetchPartsByTypeId(typeId) {
-  "use server";
-  try {
-    const id = Number(typeId);
-    if (Number.isNaN(id)) return { data: [], error: null };
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc("get_partspertype", {
-      type_id: id,
-    });
-    if (error) throw error;
-    return { data: Array.isArray(data) ? data : [], error: null };
-  } catch (err) {
-    return { data: null, error: err?.message ?? String(err) };
-  }
-}
-
-async function fetchItemsPerType(typeId) {
-  "use server";
-  try {
-    const id = Number(typeId);
-    if (Number.isNaN(id)) return { data: [], error: null };
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc("get_itemspertype", {
-      p_type_id: id,
-    });
-    if (error) throw error;
-    return { data: Array.isArray(data) ? data : [], error: null };
-  } catch (err) {
-    return { data: null, error: err?.message ?? String(err) };
-  }
-}
-
-async function insertJob(
-  p_equipmentitems_id,
-  p_technician_id,
-  p_datein,
-  p_dateout,
-  p_comments,
+async function fetchRptEquipmentPopulationByArea(
   p_mine_id,
   p_shaft_id,
   p_section_id,
-  p_gang_id
+  p_gang_id,
+  p_equipmenttypes_id
 ) {
   "use server";
   try {
+    const mineId = p_mine_id != null ? Number(p_mine_id) : 0;
+    const shaftId = p_shaft_id != null ? Number(p_shaft_id) : 0;
+    const sectionId = p_section_id != null ? Number(p_section_id) : 0;
+    const gangId = p_gang_id != null ? Number(p_gang_id) : 0;
+    const typeIds = Array.isArray(p_equipmenttypes_id)
+      ? p_equipmenttypes_id.map(Number).filter((n) => !Number.isNaN(n))
+      : [];
     const supabase = await createClient();
-    const { data, error } = await supabase.rpc("insert_job", {
-      p_equipmentitems_id: Number(p_equipmentitems_id) || null,
-      p_technician_id: Number(p_technician_id) || null,
-      p_datein: p_datein || null,
-      p_dateout: p_dateout || null,
-      p_comments: p_comments ?? null,
-      p_mine_id: Number(p_mine_id) || null,
-      p_shaft_id: Number(p_shaft_id) || null,
-      p_section_id: Number(p_section_id) || null,
-      p_gang_id: Number(p_gang_id) || null,
+    const { data, error } = await supabase.rpc("rpt_equipmentpopulationbyarea", {
+      p_mine_id: mineId,
+      p_shaft_id: shaftId,
+      p_section_id: sectionId,
+      p_gang_id: gangId,
+      p_equipmenttypes_id: typeIds,
     });
     if (error) throw error;
-    const result =
-      typeof data === "number"
-        ? data
-        : data?.insert_job ?? (Array.isArray(data) ? data[0]?.insert_job : null);
-    return { insertJob: result ?? null, error: null };
+    return { data: Array.isArray(data) ? data : [], error: null };
   } catch (err) {
-    return { insertJob: null, error: err?.message ?? String(err) };
+    return { data: null, error: err?.message ?? String(err) };
   }
 }
 
-async function insertPartsPerJob(
-  p_equipmentitems_id,
-  p_jobs_id,
-  p_parts_id,
-  p_qty,
-  p_unitcost,
-  p_isdamaged
-) {
-  "use server";
-  try {
-    const supabase = await createClient();
-    const { error } = await supabase.rpc("insert_partsperjob", {
-      p_equipmentitems_id: Number(p_equipmentitems_id) || null,
-      p_jobs_id: Number(p_jobs_id) || null,
-      p_parts_id: Number(p_parts_id) ?? null,
-      p_qty: Math.floor(Number(p_qty)) || 0,
-      p_unitcost: Number(p_unitcost) ?? 0,
-      p_isdamaged: Boolean(p_isdamaged),
-    });
-    if (error) throw error;
-    return { error: null };
-  } catch (err) {
-    return { error: err?.message ?? String(err) };
-  }
-}
-
-export default async function AddJobPage() {
-  const { data: equipmentTypes, error: typesError } =
-    await getEquipmentTypes();
-  const { data: technicians, error: techniciansError } =
-    await getTechnicians();
+export default async function RptEquipmentPopulationByAreaPage() {
+  const { data: equipmentTypes, error: typesError } = await getEquipmentTypes();
   const { data: mines, error: minesError } = await getMines();
   const types = equipmentTypes ?? [];
-  const techList = technicians ?? [];
   const minesList = mines ?? [];
-  const firstId = types.length > 0 ? types[0].id : null;
-  const initialParts =
-    firstId != null
-      ? await (async () => {
-          const result = await fetchPartsByTypeId(firstId);
-          return result?.data ?? [];
-        })()
-      : [];
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 font-sans dark:bg-zinc-950">
@@ -255,7 +147,7 @@ export default async function AddJobPage() {
           ← Menu
         </Link>
         <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Add Job
+          Equipment Population By Area
         </h1>
         <form action={signOut}>
           <button
@@ -272,29 +164,18 @@ export default async function AddJobPage() {
             {typesError}
           </p>
         )}
-        {techniciansError && (
-          <p className="mb-4 text-sm text-amber-600 dark:text-amber-400">
-            {techniciansError}
-          </p>
-        )}
         {minesError && (
           <p className="mb-4 text-sm text-amber-600 dark:text-amber-400">
             {minesError}
           </p>
         )}
-        <AddJobContent
+        <EquipmentPopulationByAreaContent
           equipmentTypes={types}
-          technicians={techList}
           mines={minesList}
           fetchShaftsByMineId={fetchShaftsByMineId}
           fetchSectionsByShaftId={fetchSectionsByShaftId}
           fetchGangsBySectionId={fetchGangsBySectionId}
-          fetchEquipmentItemById={fetchEquipmentItemById}
-          initialPartsData={initialParts}
-          fetchPartsByTypeId={fetchPartsByTypeId}
-          fetchItemsPerType={fetchItemsPerType}
-          insertJob={insertJob}
-          insertPartsPerJob={insertPartsPerJob}
+          fetchRptEquipmentPopulationByArea={fetchRptEquipmentPopulationByArea}
         />
       </main>
     </div>

@@ -40,6 +40,18 @@ function numericValue(val) {
   return Number.isNaN(n) ? 0 : n;
 }
 
+function formatCost(value) {
+  if (value == null || value === "") return "";
+  const n = Number(value);
+  if (Number.isNaN(n)) return String(value);
+  const fixed = n.toFixed(2);
+  const parts = fixed.split(".");
+  const intPart = parts[0] ?? "0";
+  const decPart = parts[1] ?? "00";
+  const withSpaces = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return `${withSpaces}.${decPart}`;
+}
+
 function rowKey(row, index) {
   return row.id != null ? String(row.id) : `row-${index}`;
 }
@@ -145,8 +157,8 @@ export function PartsPerTypeGrid({
                     )}
                   </td>
                 ))}
-                <td className={tdClass}>
-                  {qtyStr === "" ? "—" : total}
+                <td className={`${tdClass} text-right`}>
+                  {qtyStr === "" ? "—" : formatCost(total)}
                 </td>
                 <td className={tdClass}>
                   <input

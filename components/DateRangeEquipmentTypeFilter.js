@@ -40,8 +40,16 @@ export function DateRangeEquipmentTypeFilter({
   showDaysSinceLastJobInput = false,
   showReportNextToSelectAll = false,
 }) {
-  const [fromDate, setFromDate] = useState(initialFromDate);
-  const [toDate, setToDate] = useState(initialToDate);
+  const [fromDate, setFromDate] = useState(() => {
+    if (initialFromDate != null && initialFromDate !== "") return initialFromDate;
+    const d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    return d.toISOString().slice(0, 10);
+  });
+  const [toDate, setToDate] = useState(() => {
+    if (initialToDate != null && initialToDate !== "") return initialToDate;
+    return new Date().toISOString().slice(0, 10);
+  });
   const [selectedMineId, setSelectedMineId] = useState(0);
   const [selectedShaftId, setSelectedShaftId] = useState(0);
   const [selectedSectionId, setSelectedSectionId] = useState(0);
