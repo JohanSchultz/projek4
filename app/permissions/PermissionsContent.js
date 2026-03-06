@@ -75,6 +75,16 @@ export function PermissionsContent({
     });
   };
 
+  const handleSelectAll = () => {
+    if (!selectedUserId) return;
+    setSelectedFunctionIds(new Set(functionsList.map((fn) => String(fn.id))));
+  };
+
+  const handleSelectNone = () => {
+    if (!selectedUserId) return;
+    setSelectedFunctionIds(new Set());
+  };
+
   const handleSave = () => {
     if (selectedUserId == null || selectedUserId === "" || typeof saveUserPermissions !== "function") return;
     setSaveError(null);
@@ -154,7 +164,26 @@ export function PermissionsContent({
             </ul>
           )}
         </div>
-        <div className="mt-3">
+        <div className="mt-3 flex w-full flex-wrap items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={handleSelectAll}
+            disabled={!selectedUserId}
+            className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            Select All
+          </button>
+          <button
+            type="button"
+            onClick={handleSelectNone}
+            disabled={!selectedUserId}
+            className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            Select None
+          </button>
+        </div>
+        <hr className="my-3 border-zinc-200 dark:border-zinc-700" />
+        <div>
           {saveError && (
             <p className="mb-2 text-sm text-amber-600 dark:text-amber-400">
               {saveError}
@@ -164,7 +193,7 @@ export function PermissionsContent({
             type="button"
             onClick={handleSave}
             disabled={!selectedUserId || saving}
-            className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            className="rounded border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600 disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save"}
           </button>

@@ -483,7 +483,7 @@ export function EditJobContent({
               });
             }}
             disabled={savePending}
-            className="rounded border border-orange-300 bg-orange-200 px-4 py-2 text-sm font-medium text-zinc-900 shadow-sm hover:bg-orange-300 disabled:opacity-50 dark:border-orange-600 dark:bg-orange-700 dark:text-zinc-100 dark:hover:bg-orange-600"
+            className="rounded border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600 disabled:opacity-50"
           >
             {savePending ? "Saving…" : "Save Changes"}
           </button>

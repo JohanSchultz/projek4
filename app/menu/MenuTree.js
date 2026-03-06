@@ -116,11 +116,13 @@ export function MenuTree({ menuVisibility = {} }) {
                   </Link>
                 </li>
               )}
-              <li role="treeitem">
-                <Link href="/partsuppliers" className={childLinkClass}>
-                  Part Suppliers
-                </Link>
-              </li>
+              {v.partSuppliers !== false && (
+                <li role="treeitem">
+                  <Link href="/partsuppliers" className={childLinkClass}>
+                    Part Suppliers
+                  </Link>
+                </li>
+              )}
             </ul>
           )}
         </li>
@@ -165,6 +167,20 @@ export function MenuTree({ menuVisibility = {} }) {
                 <li role="treeitem">
                   <Link href="/notes" className={childLinkClass}>
                     Notes
+                  </Link>
+                </li>
+              )}
+              {v.partsReceived !== false && (
+                <li role="treeitem">
+                  <Link href="/partsreceived" className={childLinkClass}>
+                    Parts Received
+                  </Link>
+                </li>
+              )}
+              {v.stockTaking !== false && (
+                <li role="treeitem">
+                  <Link href="/stocktaking" className={childLinkClass}>
+                    Stock Taking
                   </Link>
                 </li>
               )}
@@ -217,21 +233,27 @@ export function MenuTree({ menuVisibility = {} }) {
                     className={`mt-0.5 ml-2 pl-3 space-y-0.5 ${treeLineClass}`}
                     role="group"
                   >
-                    <li role="treeitem">
-                      <Link href="/rpt_partstocklevels" className={childLinkClass}>
-                        Part Stock Levels
-                      </Link>
-                    </li>
-                    <li role="treeitem">
-                      <Link href="/rpt_averagepartusagepermonth" className={childLinkClass}>
-                        Average Part Usage Per Month
-                      </Link>
-                    </li>
-                    <li role="treeitem">
-                      <Link href="/rpt_partusageaspercofjobs" className={childLinkClass}>
-                        Part Usage As % of Jobs
-                      </Link>
-                    </li>
+                    {v.partStockLevels !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_partstocklevels" className={childLinkClass}>
+                          Part Stock Levels
+                        </Link>
+                      </li>
+                    )}
+                    {v.averagePartUsagePerMonth !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_averagepartusagepermonth" className={childLinkClass}>
+                          Average Part Usage Per Month
+                        </Link>
+                      </li>
+                    )}
+                    {v.partUsageAsPercOfJobs !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_partusageaspercofjobs" className={childLinkClass}>
+                          Part Usage As % of Jobs
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 )}
               </li>
@@ -258,11 +280,13 @@ export function MenuTree({ menuVisibility = {} }) {
                     className={`mt-0.5 ml-2 pl-3 space-y-0.5 ${treeLineClass}`}
                     role="group"
                   >
-                    <li role="treeitem">
-                      <Link href="/rpt_servicesdone" className={childLinkClass}>
-                        Services done
-                      </Link>
-                    </li>
+                    {v.servicesDone !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_servicesdone" className={childLinkClass}>
+                          Services done
+                        </Link>
+                      </li>
+                    )}
                     {v.serviceList !== false && (
                       <li role="treeitem">
                         <Link href="/report_servicelist" className={childLinkClass}>
@@ -270,26 +294,34 @@ export function MenuTree({ menuVisibility = {} }) {
                         </Link>
                       </li>
                     )}
-                    <li role="treeitem">
-                      <Link href="/rpt_jobspertechnician" className={childLinkClass}>
-                        Jobs per Technician
-                      </Link>
-                    </li>
-                    <li role="treeitem">
-                      <Link href="/rpt_jobspereqitem" className={childLinkClass}>
-                        Job Count per Equipment Item
-                      </Link>
-                    </li>
-                    <li role="treeitem">
-                      <Link href="/rpt_qtyservicedbytype" className={childLinkClass}>
-                        Qty Serviced By type
-                      </Link>
-                    </li>
-                    <li role="treeitem">
-                      <Link href="/rpt_indiv_history" className={childLinkClass}>
-                        Individual Item History
-                      </Link>
-                    </li>
+                    {v.jobsPerTechnician !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_jobspertechnician" className={childLinkClass}>
+                          Jobs per Technician
+                        </Link>
+                      </li>
+                    )}
+                    {v.jobCountPerEquipmentItem !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_jobspereqitem" className={childLinkClass}>
+                          Job Count per Equipment Item
+                        </Link>
+                      </li>
+                    )}
+                    {v.qtyServicedByType !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_qtyservicedbytype" className={childLinkClass}>
+                          Qty Serviced By type
+                        </Link>
+                      </li>
+                    )}
+                    {v.individualItemHistory !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_indiv_history" className={childLinkClass}>
+                          Individual Item History
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 )}
               </li>
@@ -316,21 +348,27 @@ export function MenuTree({ menuVisibility = {} }) {
                     className={`mt-0.5 ml-2 pl-3 space-y-0.5 ${treeLineClass}`}
                     role="group"
                   >
-                    <li role="treeitem">
-                      <Link href="/rpt_costbyareaandtype" className={childLinkClass}>
-                        Cost by Area and Type
-                      </Link>
-                    </li>
-                    <li role="treeitem">
-                      <Link href="/rpt_monthlycostpertype" className={childLinkClass}>
-                        Monthly Cost Per Equipment Type
-                      </Link>
-                    </li>
-                    <li role="treeitem">
-                      <Link href="/rpt_costperitem" className={childLinkClass}>
-                        Cost Per Equipment Item
-                      </Link>
-                    </li>
+                    {v.costByAreaAndType !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_costbyareaandtype" className={childLinkClass}>
+                          Cost by Area and Type
+                        </Link>
+                      </li>
+                    )}
+                    {v.monthlyCostPerEquipmentType !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_monthlycostpertype" className={childLinkClass}>
+                          Monthly Cost Per Equipment Type
+                        </Link>
+                      </li>
+                    )}
+                    {v.costPerEquipmentItem !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_costperitem" className={childLinkClass}>
+                          Cost Per Equipment Item
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 )}
               </li>
@@ -364,26 +402,34 @@ export function MenuTree({ menuVisibility = {} }) {
                         </Link>
                       </li>
                     )}
-                    <li role="treeitem">
-                      <Link href="/rpt_norecentjobs" className={childLinkClass}>
-                        No Recent Jobs
-                      </Link>
-                    </li>
-                    <li role="treeitem">
-                      <Link href="/rpt_equipmentabuse" className={childLinkClass}>
-                        Equipment Abuse
-                      </Link>
-                    </li>
-                    <li role="treeitem">
-                      <Link href="/rpt_equipmentpopulationbyarea" className={childLinkClass}>
-                        Equipment Population By Area
-                      </Link>
-                    </li>
-                    <li role="treeitem">
-                      <Link href="/rpt_meantimebetweenfailures" className={childLinkClass}>
-                        Mean Time Between Failures
-                      </Link>
-                    </li>
+                    {v.noRecentJobs !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_norecentjobs" className={childLinkClass}>
+                          No Recent Jobs
+                        </Link>
+                      </li>
+                    )}
+                    {v.equipmentAbuse !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_equipmentabuse" className={childLinkClass}>
+                          Equipment Abuse
+                        </Link>
+                      </li>
+                    )}
+                    {v.equipmentPopulationByArea !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_equipmentpopulationbyarea" className={childLinkClass}>
+                          Equipment Population By Area
+                        </Link>
+                      </li>
+                    )}
+                    {v.meanTimeBetweenFailures !== false && (
+                      <li role="treeitem">
+                        <Link href="/rpt_meantimebetweenfailures" className={childLinkClass}>
+                          Mean Time Between Failures
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 )}
               </li>

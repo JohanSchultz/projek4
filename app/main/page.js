@@ -150,7 +150,7 @@ export default async function MainPage({ searchParams: searchParamsProp }) {
             </label>
             <button
               type="submit"
-              className="rounded bg-zinc-800 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+              className="rounded border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600 dark:border-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
             >
               Save
             </button>
