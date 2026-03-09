@@ -66,10 +66,20 @@ export function DateRangeEquipmentTypeFilter({
   const [daysSinceLastJob, setDaysSinceLastJob] = useState("180");
 
   useEffect(() => {
-    setFromDate(initialFromDate);
+    if (initialFromDate != null && initialFromDate !== "") {
+      setFromDate(initialFromDate);
+    } else {
+      const d = new Date();
+      d.setMonth(d.getMonth() - 1);
+      setFromDate(d.toISOString().slice(0, 10));
+    }
   }, [initialFromDate]);
   useEffect(() => {
-    setToDate(initialToDate);
+    if (initialToDate != null && initialToDate !== "") {
+      setToDate(initialToDate);
+    } else {
+      setToDate(new Date().toISOString().slice(0, 10));
+    }
   }, [initialToDate]);
   useEffect(() => {
     setSelectedIds(new Set(initialSelectedIds.map(Number)));
