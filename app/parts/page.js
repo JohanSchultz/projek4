@@ -39,7 +39,6 @@ async function searchPartsByStockCode(prefix) {
   "use server";
   try {
     const trimmed = typeof prefix === "string" ? prefix.trim() : "";
-    if (trimmed.length < 2) return { data: [], error: null };
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("parts")
@@ -57,7 +56,6 @@ async function searchPartsByDescription(prefix) {
   "use server";
   try {
     const trimmed = typeof prefix === "string" ? prefix.trim() : "";
-    if (trimmed.length < 3) return { data: [], error: null };
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("parts")

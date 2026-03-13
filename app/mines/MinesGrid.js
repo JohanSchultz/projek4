@@ -40,7 +40,7 @@ function formatValue(value) {
 export function MinesGrid({ data, onRowClick }) {
   const rows = Array.isArray(data) ? data : [];
   const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
-  const invisibleKeys = ["id", "created_at", "matgroupid"];
+  const invisibleKeys = ["id", "created_at", "matgroupid", "tenant_id"];
 
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">

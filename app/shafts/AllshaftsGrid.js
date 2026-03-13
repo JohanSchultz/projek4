@@ -54,7 +54,7 @@ export function AllshaftsGrid({ data, onRowClick }) {
               <th
                 key={key}
                 className={
-                  key === "id" || key === "mine_id"
+                  key === "id" || key === "mine_id" || key === "tenant_id"
                     ? `${thClass} ${invisibleColClass}`
                     : thClass
                 }
@@ -83,7 +83,7 @@ export function AllshaftsGrid({ data, onRowClick }) {
                 <td
                   key={key}
                   className={
-                    key === "id" || key === "mine_id"
+                    key === "id" || key === "mine_id" || key === "tenant_id"
                       ? `${tdClass} ${invisibleColClass}`
                       : tdClass
                   }

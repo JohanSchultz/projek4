@@ -102,7 +102,7 @@ export function PartsPerTypeGrid({
               <th
                 key={key}
                 className={
-                  key === "partid"
+                  key === "partid" || key === "tenant_id"
                     ? `${thClass} ${invisibleColClass}`
                     : thClass
                 }

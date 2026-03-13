@@ -190,7 +190,7 @@ export function JobsPerTechnicianContent({ getJobsPerTechnician }) {
     });
   };
 
-  const orderedKeys = gridData.length > 0 ? Object.keys(gridData[0]) : [];
+  const orderedKeys = gridData.length > 0 ? Object.keys(gridData[0]).filter((k) => k !== "tenant_id") : [];
   const technicianKey = findTechnicianKey(orderedKeys);
   const totalKey = findTotalKey(orderedKeys);
   const jobCountKey = findJobCountKey(orderedKeys);

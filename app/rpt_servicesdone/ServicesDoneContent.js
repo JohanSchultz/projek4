@@ -530,7 +530,7 @@ export function ServicesDoneContent({
 
   const handleExportToExcel = () => {
     if (!gridData.length) return;
-    const orderedKeys = Object.keys(gridData[0]);
+    const orderedKeys = Object.keys(gridData[0]).filter((k) => k !== "tenant_id");
     const totalKey = findTotalKey(orderedKeys);
     const headers = orderedKeys.map((k) => getGridColumnHeader(k));
     const rows = [headers, ...gridData.map((row) =>
@@ -605,7 +605,7 @@ export function ServicesDoneContent({
           </p>
         )}
         {!isPending && !reportError && gridData.length > 0 && (() => {
-          const orderedKeys = Object.keys(gridData[0]);
+          const orderedKeys = Object.keys(gridData[0]).filter((k) => k !== "tenant_id");
           const rowsToRender = gridData;
           const totalKey = findTotalKey(orderedKeys);
           const partKey = findPartKey(orderedKeys);

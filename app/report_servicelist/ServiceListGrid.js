@@ -85,12 +85,13 @@ function rowsWithSubtotals(rows, orderedKeys) {
 
 export function ServiceListGrid({ data, columnConfig }) {
   const rows = Array.isArray(data) ? data : [];
-  const orderedKeys =
+  const rawKeys =
     columnConfig?.orderedKeys?.length > 0 && rows.length > 0
       ? columnConfig.orderedKeys
       : rows.length > 0
         ? Object.keys(rows[0])
         : [];
+  const orderedKeys = rawKeys.filter((k) => k !== "tenant_id");
   const headerLabels =
     columnConfig?.headerLabels?.length === orderedKeys.length
       ? columnConfig.headerLabels

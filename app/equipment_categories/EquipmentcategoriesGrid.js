@@ -50,7 +50,7 @@ export function EquipmentcategoriesGrid({ data, onRowClick }) {
               <th
                 key={key}
                 className={
-                  key === "id" || key === "created_at" || key === "matgroupid"
+                  key === "id" || key === "created_at" || key === "matgroupid" || key === "tenant_id"
                     ? `${thClass} ${invisibleColClass}`
                     : thClass
                 }
@@ -79,7 +79,7 @@ export function EquipmentcategoriesGrid({ data, onRowClick }) {
                 <td
                   key={key}
                   className={
-                    key === "id" || key === "created_at" || key === "matgroupid"
+                    key === "id" || key === "created_at" || key === "matgroupid" || key === "tenant_id"
                       ? `${tdClass} ${invisibleColClass}`
                       : tdClass
                   }

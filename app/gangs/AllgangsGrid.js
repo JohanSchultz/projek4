@@ -73,7 +73,7 @@ export function AllgangsGrid({ data, onRowClick }) {
               <th
                 key={key}
                 className={
-                  key === "id" || key === "mine_id" || key === "shaft_id" || key === "section_id"
+                  key === "id" || key === "mine_id" || key === "shaft_id" || key === "section_id" || key === "tenant_id"
                     ? `${thClass} ${invisibleColClass}`
                     : thClass
                 }
@@ -102,7 +102,7 @@ export function AllgangsGrid({ data, onRowClick }) {
                 <td
                   key={key}
                   className={
-                    key === "id" || key === "mine_id" || key === "shaft_id" || key === "section_id"
+                    key === "id" || key === "mine_id" || key === "shaft_id" || key === "section_id" || key === "tenant_id"
                       ? `${tdClass} ${invisibleColClass}`
                       : tdClass
                   }

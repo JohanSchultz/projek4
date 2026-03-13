@@ -34,7 +34,7 @@ function rowKey(row, index) {
 
 export function EquipmentTypesGrid({ data }) {
   const rows = data ?? [];
-  const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+  const columns = rows.length > 0 ? Object.keys(rows[0]).filter((k) => k !== "tenant_id") : [];
   const [numericValues, setNumericValues] = useState({});
 
   const setNumericFor = useCallback((key, value) => {

@@ -45,7 +45,6 @@ export function PartsContent({ equipmentTypes = [], insertPart, insertPartsPerTy
 
   const handleSearchPnClick = () => {
     const prefix = stockCode.trim();
-    if (prefix.length < 2) return;
     setSaveError(null);
     if (typeof searchPartsByStockCode !== "function") return;
     searchPartsByStockCode(prefix).then((res) => {
@@ -56,7 +55,6 @@ export function PartsContent({ equipmentTypes = [], insertPart, insertPartsPerTy
 
   const handleSearchdClick = () => {
     const prefix = description.trim();
-    if (prefix.length < 3) return;
     setSaveError(null);
     if (typeof searchPartsByDescription !== "function") return;
     searchPartsByDescription(prefix).then((res) => {
@@ -305,8 +303,7 @@ export function PartsContent({ equipmentTypes = [], insertPart, insertPartsPerTy
           <button
             type="button"
             onClick={handleSearchPnClick}
-            disabled={stockCode.trim().length < 2}
-            className={searchBtnClass + " disabled:opacity-50"}
+            className={searchBtnClass}
             aria-label="Search by part number"
           >
             Search &gt;&gt;
@@ -329,8 +326,7 @@ export function PartsContent({ equipmentTypes = [], insertPart, insertPartsPerTy
           <button
             type="button"
             onClick={handleSearchdClick}
-            disabled={description.trim().length < 3}
-            className={searchBtnClass + " disabled:opacity-50"}
+            className={searchBtnClass}
             aria-label="Search by description"
           >
             Search &gt;&gt;

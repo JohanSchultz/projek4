@@ -17,7 +17,7 @@ function numericVal(val) {
   return Number.isNaN(n) ? 0 : n;
 }
 
-const HIDDEN_COLS = new Set(["id", "equipmenttypes_id", "dateout", "comments", "technician_id"]);
+const HIDDEN_COLS = new Set(["id", "equipmenttypes_id", "dateout", "comments", "technician_id", "tenant_id"]);
 
 function formatDateForInput(value) {
   if (value == null || value === "") return "";

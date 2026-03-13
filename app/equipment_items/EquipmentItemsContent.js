@@ -144,9 +144,12 @@ export function EquipmentItemsContent({
 
   const handleSearchClick = () => {
     const term = serialNumber.trim();
-    if (term.length < 2) return;
+    const hasSerial = term.length >= 2;
+    const hasCategoryAndType = categoryId !== 0 && typeId !== 0;
+    if (!hasSerial && !hasCategoryAndType) return;
     if (typeof searchEquipmentItemsBySerial !== "function") return;
-    searchEquipmentItemsBySerial(term).then((res) => {
+    const typeIdForSearch = hasSerial ? null : typeId;
+    searchEquipmentItemsBySerial(term, typeIdForSearch).then((res) => {
       setSearchResults(Array.isArray(res?.data) ? res.data : []);
       setShowSearchPopup(true);
     });
@@ -480,7 +483,10 @@ export function EquipmentItemsContent({
             <button
               type="button"
               onClick={handleSearchClick}
-              disabled={serialNumber.trim().length < 2}
+              disabled={
+                (categoryId === 0 || typeId === 0) &&
+                serialNumber.trim().length < 2
+              }
               className="rounded-r border border-l-0 border-zinc-300 bg-white px-2 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
             >
               Search &gt;&gt;

@@ -551,7 +551,7 @@ export function PartsReceivedContent({
                       <th
                         key={key}
                         className={
-                          key === "id" || key === "part_id"
+                          key === "id" || key === "part_id" || key === "tenant_id"
                             ? `${gridThClass} ${invisibleColClass}`
                             : gridThClass
                         }
@@ -580,7 +580,7 @@ export function PartsReceivedContent({
                       <td
                         key={key}
                         className={
-                          key === "id" || key === "part_id"
+                          key === "id" || key === "part_id" || key === "tenant_id"
                             ? `${gridTdClass} ${invisibleColClass}`
                             : gridTdClass
                         }

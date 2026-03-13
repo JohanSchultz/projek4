@@ -246,20 +246,27 @@ async function updateEquipmentItem(
   }
 }
 
-async function searchEquipmentItemsBySerial(searchText) {
+async function searchEquipmentItemsBySerial(searchText, equipmenttypesId) {
   "use server";
   try {
     const term =
       typeof searchText === "string" ? searchText.trim() : "";
-    if (term.length < 2) {
-      return { data: [], error: null };
-    }
+    const typeId =
+      equipmenttypesId != null && equipmenttypesId !== ""
+        ? Number(equipmenttypesId)
+        : 0;
     const supabase = await createClient();
-    const { data, error } = await supabase
+    let query = supabase
       .from("equipmentitems")
       .select("id, serialno, equipmenttypes(descr)")
-      .ilike("serialno", `%${term}%`)
       .order("serialno", { ascending: true });
+    if (term.length >= 2) {
+      query = query.ilike("serialno", `%${term}%`);
+    }
+    if (typeId && !Number.isNaN(typeId)) {
+      query = query.eq("equipmenttypes_id", typeId);
+    }
+    const { data, error } = await query;
     if (error) throw error;
     return { data: Array.isArray(data) ? data : [], error: null };
   } catch (err) {

@@ -770,7 +770,7 @@ export function NotesContent({
                       <th
                         key={key}
                         className={
-                          key === "id" || key === "technicians_id"
+                          key === "id" || key === "technicians_id" || key === "tenant_id"
                             ? `${gridThClass} ${gridInvisibleColClass}`
                             : gridThClass
                         }
@@ -799,7 +799,7 @@ export function NotesContent({
                         <td
                           key={key}
                           className={
-                            key === "id" || key === "technicians_id"
+                            key === "id" || key === "technicians_id" || key === "tenant_id"
                               ? `${gridTdClass} ${gridInvisibleColClass}`
                               : gridTdClass
                           }

@@ -123,6 +123,11 @@ export function MenuTree({ menuVisibility = {} }) {
                   </Link>
                 </li>
               )}
+              <li role="treeitem">
+                <Link href="/technicians" className={childLinkClass}>
+                  Technicians
+                </Link>
+              </li>
             </ul>
           )}
         </li>
