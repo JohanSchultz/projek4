@@ -16,12 +16,10 @@ export default function ResetPasswordPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    // Exchange recovery code for a session
-    const { error } = await supabase.auth.exchangeCodeForSession(
-      window.location.href
-    );
-
-    if (!error) {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash;
+    const params = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
+    if (params.get("type") === "recovery") {
       setMode("set");
     }
   }, []);
