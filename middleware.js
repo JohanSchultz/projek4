@@ -29,9 +29,10 @@ export async function middleware(request) {
   const user = data?.claims;
 
   if (
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
+  	!user &&
+  	!request.nextUrl.pathname.startsWith("/login") &&
+  	!request.nextUrl.pathname.startsWith("/auth") &&
+  	!request.nextUrl.pathname.startsWith("/reset-password")
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
