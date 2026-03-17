@@ -37,7 +37,7 @@ export default function LoginPage() {
     try {
       const supabase = createClient();
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
-        redirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/login`,
+        redirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/reset-password`,
       });
       if (resetError) throw resetError;
       setResetMessage("If an account exists for that email, you will receive a password reset link.");
