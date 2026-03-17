@@ -16,8 +16,6 @@ export default function ResetPasswordPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const supabase = createClient();
-
     // Exchange recovery code for a session
     const { error } = await supabase.auth.exchangeCodeForSession(
       window.location.href
