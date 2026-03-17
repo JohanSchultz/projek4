@@ -2,11 +2,12 @@
 
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState("request"); // "request" | "set"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,12 +18,39 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    // Supabase can redirect in two ways:
+    // - Implicit flow: `#type=recovery&access_token=...`
+    // - PKCE flow: `?code=...` (what you're seeing on Vercel)
     const hash = window.location.hash;
-    const params = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
-    if (params.get("type") === "recovery") {
+    const hashParams = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
+    const hashType = hashParams.get("type");
+
+    const code = searchParams?.get("code");
+    if (code) {
+      setError("");
+      setMessage("");
+      setLoading(true);
+      const supabase = createClient();
+      supabase.auth
+        .exchangeCodeForSession(code)
+        .then(({ error: exchangeError }) => {
+          if (exchangeError) throw exchangeError;
+          setMode("set");
+          // Remove the code from the URL.
+          router.replace("/reset-password");
+        })
+        .catch((err) => {
+          setError(err?.message ?? "Unable to verify reset link. Please request a new one.");
+        })
+        .finally(() => setLoading(false));
+      return;
+    }
+
+    if (hashType === "recovery") {
       setMode("set");
     }
-  }, []);
+  }, [router, searchParams]);
 
   async function handleRequestReset(e) {
     e.preventDefault();
