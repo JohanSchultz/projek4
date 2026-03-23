@@ -1,11 +1,12 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -16,6 +17,11 @@ export default function LoginPage() {
   const [resetMessage, setResetMessage] = useState("");
 
   useEffect(() => {
+    const code = searchParams?.get("code");
+    if (code) {
+      router.replace(`/auth/callback?code=${encodeURIComponent(code)}&next=/reset-password`);
+      return;
+    }
     createClient()
       .auth.getSession()
       .then(({ data: { session } }) => {
@@ -23,7 +29,7 @@ export default function LoginPage() {
           router.replace("/menu");
         }
       });
-  }, [router]);
+  }, [router, searchParams]);
 
   async function handleResetPassword(e) {
     e.preventDefault();
