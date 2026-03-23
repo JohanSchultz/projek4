@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { EquipmentAbuseContent } from "./EquipmentAbuseContent";
 
 async function signOut() {
@@ -136,6 +137,7 @@ async function fetchRptWillfulDamage(
 }
 
 export default async function RptEquipmentAbusePage() {
+  await requireFunctionAccess(32);
   const { data: equipmentTypes, error: typesError } = await getEquipmentTypes();
   const { data: mines, error: minesError } = await getMines();
   const types = equipmentTypes ?? [];

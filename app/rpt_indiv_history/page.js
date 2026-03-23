@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { IndivHistoryContent } from "./IndivHistoryContent";
 
 async function signOut() {
@@ -98,6 +99,7 @@ async function getEquipmentItemById(id) {
 }
 
 export default async function RptIndivHistoryPage() {
+  await requireFunctionAccess(27);
   const { data: equipmentTypes, error: typesError } = await getEquipmentTypes();
   const types = equipmentTypes ?? [];
   return (

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { AddJobContent } from "./AddJobContent";
 
 async function signOut() {
@@ -228,6 +229,7 @@ async function insertPartsPerJob(
 }
 
 export default async function AddJobPage() {
+  await requireFunctionAccess(9);
   const { data: equipmentTypes, error: typesError } =
     await getEquipmentTypes();
   const { data: technicians, error: techniciansError } =

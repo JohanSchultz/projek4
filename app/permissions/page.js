@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { PermissionsContent } from "./PermissionsContent";
 
 async function signOut() {
@@ -112,6 +113,7 @@ async function saveUserPermissions(userId, functionIds) {
 }
 
 export default async function PermissionsPage() {
+  await requireFunctionAccess(13);
   const { data: users, error: usersError } = await getAllUsers();
   const { data: functionsList, error: functionsError } = await getFunctions();
   const usersList = users ?? [];

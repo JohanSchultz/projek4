@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { NotesContent } from "./NotesContent";
 
 async function signOut() {
@@ -266,6 +267,7 @@ async function insertNote(equipmentitemId, techniciansId, description, isfinalis
 }
 
 export default async function NotesPage() {
+  await requireFunctionAccess(10);
   const { data: categories } = await getEquipmentCategories();
   const { data: types } = await getEquipmentTypes();
   const { data: technicians } = await getTechnicians();

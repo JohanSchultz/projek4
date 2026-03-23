@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { EquipmentPopulationByAreaContent } from "./EquipmentPopulationByAreaContent";
 
 async function signOut() {
@@ -132,6 +133,7 @@ async function fetchRptEquipmentPopulationByArea(
 }
 
 export default async function RptEquipmentPopulationByAreaPage() {
+  await requireFunctionAccess(33);
   const { data: equipmentTypes, error: typesError } = await getEquipmentTypes();
   const { data: mines, error: minesError } = await getMines();
   const types = equipmentTypes ?? [];

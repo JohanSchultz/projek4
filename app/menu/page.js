@@ -59,6 +59,7 @@ export default async function MenuPage() {
     serviceList: hasFunctionId(gridRows, 12),
     permissions: hasFunctionId(gridRows, 13),
     partSuppliers: hasFunctionId(gridRows, 15),
+    technicians: hasFunctionId(gridRows, 16),
     partsReceived: hasFunctionId(gridRows, 17),
     stockTaking: hasFunctionId(gridRows, 18),
     partStockLevels: hasFunctionId(gridRows, 19),

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { PartSuppliersContent } from "./PartSuppliersContent";
 
 async function signOut() {
@@ -72,6 +73,7 @@ async function fetchAllPartSuppliers() {
 }
 
 export default async function PartSuppliersPage() {
+  await requireFunctionAccess(15);
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 font-sans dark:bg-zinc-950">
       <header className="flex shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900">

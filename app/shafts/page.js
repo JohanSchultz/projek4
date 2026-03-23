@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { ShaftsContent } from "./ShaftsContent";
 
 async function signOut() {
@@ -90,6 +91,7 @@ async function fetchAllShafts() {
 }
 
 export default async function ShaftsPage() {
+  await requireFunctionAccess(5);
   const { data: mines, error: minesError } = await getMines();
   const mineList = mines ?? [];
 

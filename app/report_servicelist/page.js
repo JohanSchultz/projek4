@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { ReportServiceListContent } from "./ReportServiceListContent";
 
 async function signOut() {
@@ -131,6 +132,7 @@ async function fetchServiceListData(
 }
 
 export default async function ReportServiceListPage() {
+  await requireFunctionAccess(12);
   const { data: equipmentTypes, error: typesError } =
     await getEquipmentTypes();
   const { data: mines, error: minesError } = await getMines();

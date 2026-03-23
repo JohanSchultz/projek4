@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { EquipmentTypesContent } from "./EquipmentTypesContent";
 
 async function signOut() {
@@ -95,6 +96,7 @@ async function fetchAllequipmenttypes() {
 }
 
 export default async function EquipmentTypesPage() {
+  await requireFunctionAccess(2);
   const { data: categories, error: categoriesError } =
     await getEquipmentCategories();
   const categoryList = categories ?? [];

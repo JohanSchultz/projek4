@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { NoRecentJobsContent } from "./NoRecentJobsContent";
 
 async function signOut() {
@@ -135,6 +136,7 @@ async function fetchNoRecentJobs(
 }
 
 export default async function RptNoRecentJobsPage() {
+  await requireFunctionAccess(31);
   const { data: equipmentTypes, error: typesError } = await getEquipmentTypes();
   const { data: mines, error: minesError } = await getMines();
   const types = equipmentTypes ?? [];

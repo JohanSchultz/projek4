@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { GangsContent } from "./GangsContent";
 
 async function signOut() {
@@ -146,6 +147,7 @@ async function fetchAllGangs() {
 }
 
 export default async function GangsPage() {
+  await requireFunctionAccess(7);
   const { data: mines, error: minesError } = await getMines();
   const mineList = mines ?? [];
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { PartsReceivedContent } from "./PartsReceivedContent";
 
 async function signOut() {
@@ -148,6 +149,7 @@ async function decrementPartStockLevel(p_part_id, p_qty) {
 }
 
 export default async function PartsReceivedPage() {
+  await requireFunctionAccess(17);
   const { data: suppliers } = await getPartSuppliers();
   const suppliersList = suppliers ?? [];
 

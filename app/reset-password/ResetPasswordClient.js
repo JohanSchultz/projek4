@@ -25,38 +25,25 @@ export function ResetPasswordClient() {
     );
     const hashType = hashParams.get("type");
 
-    const code = searchParams?.get("code");
-    if (code) {
-      setError("");
-      setMessage("");
-      setLoading(true);
-      const supabase = createClient();
-      supabase.auth
-        .exchangeCodeForSession(code)
-        .then(({ error: exchangeError }) => {
-          if (exchangeError) throw exchangeError;
-          setMode("set");
-          router.replace("/reset-password");
-        })
-        .catch((err) => {
-          const msg = String(err?.message ?? "");
-          if (msg.toLowerCase().includes("pkce code verifier not found")) {
-            setError(
-              "This reset link can’t be verified in this browser session. Please request a new password reset email and use the latest link."
-            );
-          } else {
-            setError(
-              msg || "Unable to verify reset link. Please request a new one."
-            );
-          }
-        })
-        .finally(() => setLoading(false));
+    const errParam = searchParams?.get("error");
+    if (errParam === "session_expired" || errParam === "auth_error") {
+      setError(
+        "This reset link could not be verified. Please request a new password reset email and use the latest link."
+      );
+      router.replace("/reset-password");
       return;
     }
 
     if (hashType === "recovery") {
       setMode("set");
+      return;
     }
+
+    createClient()
+      .auth.getSession()
+      .then(({ data: { session } }) => {
+        if (session) setMode("set");
+      });
   }, [router, searchParams]);
 
   async function handleRequestReset(e) {
@@ -73,7 +60,7 @@ export function ResetPasswordClient() {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
         email.trim(),
         {
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
         }
       );
       if (resetError) throw resetError;

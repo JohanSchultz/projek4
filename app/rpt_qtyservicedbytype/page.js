@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireFunctionAccess } from "@/lib/auth/requireFunctionAccess";
 import { QtysServicedByTypeContent } from "./QtysServicedByTypeContent";
 
 async function signOut() {
@@ -136,6 +137,7 @@ async function fetchJobCountByType(
 }
 
 export default async function RptQtysServicedByTypePage() {
+  await requireFunctionAccess(26);
   const { data: equipmentTypes, error: typesError } = await getEquipmentTypes();
   const { data: mines, error: minesError } = await getMines();
   const types = equipmentTypes ?? [];
